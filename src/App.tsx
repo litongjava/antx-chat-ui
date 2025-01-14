@@ -300,10 +300,9 @@ const Independent: React.FC = () => {
           }
           onSuccess(content);
         } catch (error) {
+          antdMessage.error('OpenAI API 错误');
           console.error('OpenAI API 错误:', error);
           onError(error as Error);
-          const err = error instanceof Error ? error : new Error(String(error));
-          onSuccess(err.message);
         }
       }
     }
