@@ -29,6 +29,18 @@ const renderMarkdown = (content: string) => (
   <div dangerouslySetInnerHTML={{__html: md.render(content)}}/>
 );
 
+function getOpenClient() {
+// 初始化 OpenAI 客户端
+  const client = new OpenAI({
+    baseURL: "http://localhost/openai/v1",
+    apiKey: "", //save in backend
+    dangerouslyAllowBrowser: true, // 注意：这会使您的 API 密钥暴露在客户端
+  });
+  return client;
+}
+
+const client = getOpenClient();
+
 // 渲染标题的辅助函数
 const renderTitle = (icon: React.ReactElement, title: string) => (
   <Space align="start">
@@ -200,12 +212,6 @@ const roles: GetProp<typeof Bubble.List, 'roles'> = {
   },
 };
 
-// 初始化 OpenAI 客户端
-const client = new OpenAI({
-  baseURL: "http://localhost/gemini/v1",
-  apiKey: "ssss",
-  dangerouslyAllowBrowser: true, // 注意：这会使您的 API 密钥暴露在客户端
-});
 
 const Independent: React.FC = () => {
   // ==================== 样式 ====================
