@@ -18,7 +18,8 @@ AntX Chat UI 是一个基于 **React**、**TypeScript**、**Vite** 和 **Ant Des
 - 在不同的选项卡中分类对话（如 *热门话题*、*设计指南*）。
 - 流畅的用户交互和优秀的界面响应速度。
 
-## 截图
+## 体验地址
+[体验地址](https://antx-chat-ui.vercel.app/)
 
 ![main.png](readme_files/main.png)
 
