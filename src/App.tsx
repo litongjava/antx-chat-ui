@@ -5,19 +5,19 @@ import React, {useEffect} from 'react';
 
 import {
   CloudUploadOutlined,
-  CommentOutlined,
+  CommentOutlined, CopyOutlined, DislikeOutlined,
   EllipsisOutlined,
   FireOutlined,
-  HeartOutlined,
+  HeartOutlined, LikeOutlined,
   OpenAIOutlined,
   PaperClipOutlined,
   PlusOutlined,
   ReadOutlined,
   ShareAltOutlined,
-  SmileOutlined,
+  SmileOutlined, SoundOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import {Badge, Button, type GetProp, Space} from 'antd';
+import {Badge, Button, type GetProp, Space, message as antdMessage} from 'antd';
 
 import OpenAI from 'openai';
 import markdownit from 'markdown-it';
@@ -27,6 +27,62 @@ const md = markdownit({html: true, breaks: true});
 // 跟单条 Bubble 的做法一样
 const renderMarkdown = (content: string) => (
   <div dangerouslySetInnerHTML={{__html: md.render(content)}}/>
+);
+
+// 复制文本
+const copyToClipboard = (text: string) => {
+  navigator.clipboard.writeText(text)
+    .then(() => {
+      antdMessage.success('Copied to clipboard');
+    })
+    .catch(() => {
+      antdMessage.error('Copy failed');
+    });
+};
+
+// 播放(read aloud)
+const readAloud = (text: string) => {
+  const utterance = new SpeechSynthesisUtterance(text);
+  window.speechSynthesis.speak(utterance);
+  antdMessage.info('Reading aloud...');
+};
+
+// 点赞/点踩
+const handleLike = () => {
+  antdMessage.success('Thanks for your feedback!');
+};
+
+const handleDislike = () => {
+  antdMessage.warning('Feedback received.');
+};
+
+
+const renderAiMarkdown = (content: string) => (
+  <div>
+    <div dangerouslySetInnerHTML={{__html: md.render(content)}}/>
+    <Space style={{marginTop: 8}}>
+      <Button
+        type="text"
+        icon={<SoundOutlined/>}
+        onClick={() => readAloud(content)}
+      />
+      <Button
+        type="text"
+        icon={<CopyOutlined/>}
+        onClick={() => copyToClipboard(content)}
+      />
+      <Button
+        type="text"
+        icon={<LikeOutlined/>}
+        onClick={handleLike}
+      />
+      <Button
+        type="text"
+        icon={<DislikeOutlined/>}
+        onClick={handleDislike}
+      />
+    </Space>
+  </div>
 );
 
 function getOpenClient() {
@@ -340,7 +396,7 @@ const Independent: React.FC = () => {
         key: id,
         //loading: status === 'loading',
         role: role,
-        messageRender: renderMarkdown,
+        messageRender: renderAiMarkdown,
         content: message,
         avatar: {icon: <OpenAIOutlined/>}
       })
