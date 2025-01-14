@@ -234,7 +234,7 @@ const Independent: React.FC = () => {
         try {
 
           const chatResponse = await client.chat.completions.create({
-            model: 'gemini-1.5-flash',
+            model: 'gemini-2.0-flash-exp',
             messages: [{role: 'user', content: message}],
             stream: true,
           });
