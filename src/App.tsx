@@ -22,7 +22,7 @@ import {
   UserOutlined,
 } from '@ant-design/icons';
 import {Attachments, Bubble, Conversations, Prompts, Sender, useXAgent, useXChat, Welcome,} from '@ant-design/x';
-import {Avatar, Button, Collapse, Flex, type GetProp, message, Space, Spin} from 'antd';
+import {Avatar, Button, Collapse, Flex, type GetProp, message, Select, Space, Spin, Tag, Tooltip} from 'antd';
 import {createStyles} from 'antd-style';
 import dayjs from 'dayjs';
 import React, {useEffect, useRef, useState} from 'react';
@@ -53,7 +53,6 @@ const renderMarkdown = (content: string, reasoning?: string | null) => (
     <div dangerouslySetInnerHTML={{__html: md.render(content)}}/>
   </div>
 );
-
 
 type BubbleDataType = {
   role: string;
@@ -275,9 +274,56 @@ const useStyle = createStyles(({token, css}) => {
         margin: 0 auto;
         color: ${token.colorText};
     `,
+    toolbar: css`
+      width: 100%;
+      max-width: 700px;
+      margin: 0 auto 8px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      padding: 0 4px;
+    `,
+    selectLabel: css`
+      font-size: 13px;
+      color: ${token.colorTextSecondary};
+      white-space: nowrap;
+    `,
+    selectWrapper: css`
+      flex: 1;
+      display: flex;
+      gap: 8px;
+      .ant-select {
+        flex: 1;
+        min-width: 120px;
+        &:hover {
+          .ant-select-selector {
+            border-color: ${token.colorPrimaryHover} !important;
+          }
+        }
+      }
+    `,
+    tag: css`
+      background: ${token.colorPrimaryBg};
+      color: ${token.colorPrimary};
+      border: none;
+      border-radius: 4px;
+      padding: 0 8px;
+      height: 24px;
+      line-height: 24px;
+    `,
   };
 });
 
+const MODEL_OPTIONS = [
+  {label: 'DeepSeek (R1)', value: 'deepseek-r1'},
+  {label: 'DeepSeek-R1-Distill-Qwen-7B', value: 'DeepSeek-R1-Distill-Qwen-7B'},
+];
+
+const TOOL_OPTIONS = [
+  {label: 'Search', value: 'search'},
+  {label: 'Linux', value: 'linux'},
+  {label: 'Translate', value: 'translate'},
+];
 const Independent: React.FC = () => {
   const {styles} = useStyle();
   const abortController = useRef<AbortController>(null);
@@ -292,6 +338,9 @@ const Independent: React.FC = () => {
   const [attachedFiles, setAttachedFiles] = useState<GetProp<typeof Attachments, 'items'>>([]);
 
   const [inputValue, setInputValue] = useState('');
+
+  const [model, setModel] = useState<string>('DeepSeek-R1-Distill-Qwen-7B');
+  const [tools, setTools] = useState<string[]>([]);
 
   /**
    * 🔔 Please replace the BASE_URL, PATH, MODEL, API_KEY with your own values.
@@ -359,6 +408,8 @@ const Independent: React.FC = () => {
     onRequest({
       stream: true,
       message: {role: 'user', content: val},
+      model: model,
+      tools: tools
     });
   };
 
@@ -600,6 +651,39 @@ const Independent: React.FC = () => {
         }}
         className={styles.senderPrompt}
       />
+      <div className={styles.toolbar}>
+        <Tooltip title="Select AI Model" placement="top">
+          <div className={styles.selectWrapper}>
+            <Select
+              value={model}
+              onChange={setModel}
+              options={MODEL_OPTIONS}
+              suffixIcon={<OpenAIOutlined/>}
+              dropdownStyle={{minWidth: 240}}
+            />
+          </div>
+        </Tooltip>
+
+        <Tooltip title="Select Tools" placement="top">
+          <div className={styles.selectWrapper}>
+            <Select
+              value={tools}
+              onChange={(vals) => setTools(vals as string[])}
+              options={TOOL_OPTIONS}
+              mode="multiple"
+              maxTagCount="responsive"
+              suffixIcon={<ProductOutlined/>}
+              dropdownStyle={{minWidth: 180}}
+            />
+          </div>
+        </Tooltip>
+
+        {tools.length > 0 && (
+          <Tag className={styles.tag} icon={<PaperClipOutlined/>}>
+            {tools.length} 工具已启用
+          </Tag>
+        )}
+      </div>
       {/* 🌟 输入框 */}
       <Sender
         value={inputValue}
