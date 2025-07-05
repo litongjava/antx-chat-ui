@@ -9,7 +9,8 @@ import {
   EllipsisOutlined,
   FileSearchOutlined,
   HeartOutlined,
-  LikeOutlined, OpenAIOutlined,
+  LikeOutlined,
+  OpenAIOutlined,
   PaperClipOutlined,
   PlusOutlined,
   ProductOutlined,
@@ -17,35 +18,47 @@ import {
   ReloadOutlined,
   ScheduleOutlined,
   ShareAltOutlined,
-  SmileOutlined, UserOutlined,
+  SmileOutlined,
+  UserOutlined,
 } from '@ant-design/icons';
-import {
-  Attachments,
-  Bubble,
-  Conversations,
-  Prompts,
-  Sender,
-  Welcome,
-  useXAgent,
-  useXChat,
-} from '@ant-design/x';
-import {Avatar, Button, Flex, type GetProp, Space, Spin, message} from 'antd';
+import {Attachments, Bubble, Conversations, Prompts, Sender, useXAgent, useXChat, Welcome,} from '@ant-design/x';
+import {Avatar, Button, Collapse, Flex, type GetProp, message, Space, Spin} from 'antd';
 import {createStyles} from 'antd-style';
 import dayjs from 'dayjs';
 import React, {useEffect, useRef, useState} from 'react';
-
 import markdownit from 'markdown-it';
 
 const md = markdownit({html: true, breaks: true});
 
-// 跟单条 Bubble 的做法一样
-const renderMarkdown = (content: string) => (
-  <div dangerouslySetInnerHTML={{__html: md.render(content)}}/>
+
+const renderMarkdown = (content: string, reasoning?: string | null) => (
+  <div>
+    {reasoning && (
+      <Collapse
+        defaultActiveKey={['1']}
+        style={{marginTop: 12}}
+        items={[
+          {
+            key: '1',
+            label: 'Thought',
+            children: (
+              <div
+                dangerouslySetInnerHTML={{__html: md.render(reasoning)}}
+              />
+            ),
+          },
+        ]}
+      />
+    )}
+    <div dangerouslySetInnerHTML={{__html: md.render(content)}}/>
+  </div>
 );
+
 
 type BubbleDataType = {
   role: string;
   content: string;
+  reasoning_content?: string | null;
 };
 
 const DEFAULT_CONVERSATIONS_ITEMS = [
@@ -320,22 +333,12 @@ const Independent: React.FC = () => {
         console.error(error);
       }
 
-      let content = '';
+      const content = `${originMessage?.content || ''}${currentContent}`;
+      const reasoning_content = `${originMessage?.reasoning_content || ''}${currentThink}`;
 
-      if (!originMessage?.content && currentThink) {
-        content = `<think>${currentThink}`;
-      } else if (
-        originMessage?.content?.includes('<think>') &&
-        !originMessage?.content.includes('</think>') &&
-        currentContent
-      ) {
-        content = `${originMessage?.content}</think>${currentContent}`;
-      } else {
-        content = `${originMessage?.content || ''}${currentThink}${currentContent}`;
-      }
       return {
         content: content,
-        reasoning_content:content,
+        reasoning_content: reasoning_content,
         role: 'assistant',
       };
     },
@@ -462,7 +465,8 @@ const Independent: React.FC = () => {
         <Bubble.List
           items={messages?.map((i) => {
             const {message, status} = i;
-            if(message?.role==='user'){
+            console.log("message", message);
+            if (message?.role === 'user') {
               return {
                 ...i.message,
                 classNames: {
@@ -471,14 +475,14 @@ const Independent: React.FC = () => {
                 avatar: {icon: <UserOutlined/>},
                 messageRender: renderMarkdown,
               }
-            }else{
+            } else {
               return {
                 ...i.message,
                 classNames: {
                   content: status === 'loading' ? styles.loadingMessage : '',
                 },
                 avatar: {icon: <OpenAIOutlined/>},
-                messageRender: renderMarkdown,
+                messageRender: content => renderMarkdown(content, i.message.reasoning_content ?? null),
                 typing: status === 'loading' ? {step: 5, interval: 20, suffix: <>💗</>} : false,
               }
             }
