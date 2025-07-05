@@ -785,7 +785,6 @@ const Independent: React.FC = () => {
                 classNames: {
                   content: status === 'loading' ? styles.loadingMessage : '',
                 },
-                avatar: {icon: <UserOutlined/>},
                 messageRender: renderMarkdown,
               }
             } else {
@@ -794,7 +793,6 @@ const Independent: React.FC = () => {
                 classNames: {
                   content: status === 'loading' ? styles.loadingMessage : '',
                 },
-                avatar: {icon: <OpenAIOutlined/>},
                 messageRender: content => renderMarkdown(content, i.message.reasoning_content ?? null),
                 typing: status === 'loading' ? {step: 5, interval: 20, suffix: <Spin size="small"/>} : false,
               }
