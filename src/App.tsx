@@ -10,6 +10,8 @@ import {
   FileSearchOutlined,
   HeartOutlined,
   LikeOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
   OpenAIOutlined,
   PaperClipOutlined,
   PlusOutlined,
@@ -29,7 +31,6 @@ import React, {useEffect, useRef, useState} from 'react';
 import markdownit from 'markdown-it';
 
 const md = markdownit({html: true, breaks: true});
-
 
 const renderMarkdown = (content: string, reasoning?: string | null) => (
   <div>
@@ -173,29 +174,95 @@ const useStyle = createStyles(({token, css}) => {
         display: flex;
         background: ${token.colorBgContainer};
         font-family: AlibabaPuHuiTi, ${token.fontFamily}, sans-serif;
+        position: relative;
+
+        @media (max-width: 768px) {
+            flex-direction: column;
+            min-width: unset;
+        }
     `,
     sider: css`
-        background: ${token.colorBgLayout}80;
+        background: ${token.colorBgLayout};
         width: 280px;
         height: 100%;
         display: flex;
         flex-direction: column;
         padding: 0 12px;
         box-sizing: border-box;
+        transition: width 0.3s, transform 0.3s;
+        z-index: 100;
+
+        @media (max-width: 768px) {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            transform: translateX(-100%);
+            width: 280px;
+            padding: 0 12px;
+            z-index: 100;
+
+            &.mobileVisible {
+                transform: translateX(0);
+            }
+        }
+
+        &.collapsed {
+            width: 80px;
+            padding: 0 8px;
+
+            .ant-conversations,
+            .addBtn > span,
+            .logo span,
+            .siderFooter .questionBtn {
+                display: none;
+            }
+
+            .addBtn {
+                width: 40px;
+                min-width: 40px;
+                padding: 0;
+                display: flex;
+                justify-content: center;
+                margin: 0 auto;
+            }
+
+            .siderFooter {
+                justify-content: center;
+                padding: 0;
+            }
+
+            .collapsedLogo {
+                justify-content: center;
+                padding: 0;
+                margin: 24px 0 16px;
+            }
+            
+            .collapsedAvatar {
+                margin-top: auto;
+            }
+        }
     `,
     logo: css`
         display: flex;
         align-items: center;
-        justify-content: start;
-        padding: 0 24px;
+        justify-content: space-between;
+        padding: 0 12px;
         box-sizing: border-box;
         gap: 8px;
         margin: 24px 0;
+
+        .logoContent {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
         span {
             font-weight: bold;
             color: ${token.colorText};
             font-size: 16px;
+            transition: opacity 0.3s;
         }
     `,
     addBtn: css`
@@ -219,6 +286,7 @@ const useStyle = createStyles(({token, css}) => {
         display: flex;
         align-items: center;
         justify-content: space-between;
+        padding: 0 8px;
     `,
     // chat list 样式
     chat: css`
@@ -229,6 +297,13 @@ const useStyle = createStyles(({token, css}) => {
         flex-direction: column;
         padding-block: ${token.paddingLG}px;
         gap: 16px;
+        flex: 1;
+        overflow: hidden;
+
+        @media (max-width: 768px) {
+            padding: 16px;
+            height: calc(100vh - 200px);
+        }
     `,
     chatPrompt: css`
         .ant-prompts-label {
@@ -247,6 +322,10 @@ const useStyle = createStyles(({token, css}) => {
     chatList: css`
         flex: 1;
         overflow: auto;
+
+        @media (max-width: 768px) {
+            padding-inline: 16px !important;
+        }
     `,
     loadingMessage: css`
         background-image: linear-gradient(90deg, #ff6b23 0%, #af3cb8 31%, #53b6ff 89%);
@@ -256,12 +335,20 @@ const useStyle = createStyles(({token, css}) => {
     `,
     placeholder: css`
         padding-top: 32px;
+
+        @media (max-width: 768px) {
+            padding-inline: 16px;
+        }
     `,
     // sender 样式
     sender: css`
         width: 100%;
-        max-width: 700px;
+        max-width: 900px;
         margin: 0 auto;
+
+        @media (max-width: 768px) {
+            padding: 0 16px;
+        }
     `,
     speechButton: css`
         font-size: 18px;
@@ -269,46 +356,154 @@ const useStyle = createStyles(({token, css}) => {
     `,
     senderPrompt: css`
         width: 100%;
-        max-width: 700px;
+        max-width: 900px;
         margin: 0 auto;
         color: ${token.colorText};
+
+        @media (max-width: 768px) {
+            padding: 0 16px;
+        }
     `,
     toolbar: css`
-      width: 100%;
-      max-width: 700px;
-      margin: 0 auto 8px;
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      padding: 0 4px;
+        width: 100%;
+        max-width: 900px;
+        margin: 0 auto 8px;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        padding: 0 4px;
+
+        @media (max-width: 768px) {
+            flex-wrap: wrap;
+            padding: 0 12px;
+        }
     `,
     selectLabel: css`
-      font-size: 13px;
-      color: ${token.colorTextSecondary};
-      white-space: nowrap;
+        font-size: 13px;
+        color: ${token.colorTextSecondary};
+        white-space: nowrap;
     `,
     selectWrapper: css`
-      flex: 1;
-      display: flex;
-      gap: 8px;
-      .ant-select {
         flex: 1;
-        min-width: 120px;
-        &:hover {
-          .ant-select-selector {
-            border-color: ${token.colorPrimaryHover} !important;
-          }
+        display: flex;
+        gap: 8px;
+
+        @media (max-width: 768px) {
+            width: 100%;
+            min-width: 100%;
         }
-      }
+
+        .ant-select {
+            flex: 1;
+            min-width: 120px;
+
+            &:hover {
+                .ant-select-selector {
+                    border-color: ${token.colorPrimaryHover} !important;
+                }
+            }
+        }
     `,
     tag: css`
-      background: ${token.colorPrimaryBg};
-      color: ${token.colorPrimary};
-      border: none;
-      border-radius: 4px;
-      padding: 0 8px;
-      height: 24px;
-      line-height: 24px;
+        background: ${token.colorPrimaryBg};
+        color: ${token.colorPrimary};
+        border: none;
+        border-radius: 4px;
+        padding: 0 8px;
+        height: 24px;
+        line-height: 24px;
+        white-space: nowrap;
+
+        @media (max-width: 768px) {
+            margin-left: auto;
+        }
+    `,
+    expandButton: css`
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        z-index: 10;
+        display: none;
+
+        @media (max-width: 768px) {
+            display: block;
+        }
+    `,
+    newChatButton: css`
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        z-index: 10;
+        display: none;
+
+        @media (max-width: 768px) {
+            display: block;
+        }
+    `,
+    overlay: css`
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 99;
+        display: none;
+
+        @media (max-width: 768px) {
+            display: block;
+        }
+    `,
+    mobileHeader: css`
+        display: none;
+        padding: 16px;
+        background: ${token.colorBgContainer};
+        border-bottom: 1px solid ${token.colorBorder};
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        justify-content: space-between;
+        align-items: center;
+
+        @media (max-width: 768px) {
+            display: flex;
+        }
+    `,
+    // 新增折叠状态下的图标样式
+    collapsedIconContainer: css`
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 24px;
+        height: 100%;
+        padding-top: 24px;
+    `,
+    collapsedIcon: css`
+        font-size: 20px;
+        color: ${token.colorText};
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 40px;
+        height: 40px;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: all 0.3s;
+
+        &:hover {
+            background: ${token.colorBgTextHover};
+        }
+    `,
+    newChatIcon: css`
+        background: ${token.colorPrimaryBg};
+        color: ${token.colorPrimary};
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
     `,
   };
 });
@@ -340,6 +535,8 @@ const Independent: React.FC = () => {
 
   const [model, setModel] = useState<string>('DeepSeek-R1-Distill-Qwen-7B');
   const [tools, setTools] = useState<string[]>([]);
+  const [siderCollapsed, setSiderCollapsed] = useState(false);
+  const [mobileSiderVisible, setMobileSiderVisible] = useState(false);
 
   /**
    * 🔔 Please replace the BASE_URL, PATH, MODEL, API_KEY with your own values.
@@ -412,102 +609,168 @@ const Independent: React.FC = () => {
     });
   };
 
+  const toggleSider = () => {
+    setSiderCollapsed(!siderCollapsed);
+  };
+
+  const toggleMobileSider = () => {
+    setMobileSiderVisible(!mobileSiderVisible);
+  };
+
+  const handleNewConversation = () => {
+    if (agent.isRequesting()) {
+      message.error(
+        'Message is Requesting, you can create a new conversation after request done or abort it right now...',
+      );
+      return;
+    }
+
+    const now = dayjs().valueOf().toString();
+    setConversations([
+      {
+        key: now,
+        label: `New Conversation ${conversations.length + 1}`,
+        group: 'Today',
+      },
+      ...conversations,
+    ]);
+    setCurConversation(now);
+    setMessages([]);
+    setMobileSiderVisible(false);
+  };
+
   // ==================== Nodes ====================
   const chatSider = (
-    <div className={styles.sider}>
-      {/* 🌟 Logo */}
-      <div className={styles.logo}>
-        <img
-          src="https://mdn.alipayobjects.com/huamei_iwk9zp/afts/img/A*eco6RrQhxbMAAAAAAAAAAAAADgCCAQ/original"
-          draggable={false}
-          alt="logo"
-          width={24}
-          height={24}
-        />
-        <span>Ant Design X</span>
-      </div>
+    <div
+      className={`${styles.sider} ${siderCollapsed ? 'collapsed' : ''} ${mobileSiderVisible ? 'mobileVisible' : ''}`}
+    >
+      {siderCollapsed ? (
+        <div className={styles.collapsedIconContainer}>
+          {/* 折叠状态下的顶部Logo */}
+          <div className="collapsedLogo">
+            <img
+              src="https://mdn.alipayobjects.com/huamei_iwk9zp/afts/img/A*eco6RrQhxbMAAAAAAAAAAAAADgCCAQ/original"
+              draggable={false}
+              alt="logo"
+              width={32}
+              height={32}
+            />
+          </div>
 
-      {/* 🌟 添加会话 */}
-      <Button
-        onClick={() => {
-          if (agent.isRequesting()) {
-            message.error(
-              'Message is Requesting, you can create a new conversation after request done or abort it right now...',
-            );
-            return;
-          }
+          {/* 折叠状态下的菜单按钮 */}
+          <Button
+            type="text"
+            className="collapsedMenuButton"
+            icon={<MenuUnfoldOutlined style={{fontSize: 20}}/>}
+            onClick={toggleSider}
+          />
 
-          const now = dayjs().valueOf().toString();
-          setConversations([
-            {
-              key: now,
-              label: `New Conversation ${conversations.length + 1}`,
-              group: 'Today',
-            },
-            ...conversations,
-          ]);
-          setCurConversation(now);
-          setMessages([]);
-        }}
-        type="link"
-        className={styles.addBtn}
-        icon={<PlusOutlined/>}
-      >
-        New Conversation
-      </Button>
+          {/* 新建会话按钮（折叠状态） */}
+          <div
+            className={styles.collapsedIcon}
+            onClick={handleNewConversation}
+          >
+            <div className={styles.newChatIcon}>
+              <PlusOutlined/>
+            </div>
+          </div>
 
-      {/* 🌟 会话管理 */}
-      <Conversations
-        items={conversations}
-        className={styles.conversations}
-        activeKey={curConversation}
-        onActiveChange={async (val) => {
-          abortController.current?.abort();
-          // The abort execution will trigger an asynchronous requestFallback, which may lead to timing issues.
-          // In future versions, the sessionId capability will be added to resolve this problem.
-          setTimeout(() => {
-            setCurConversation(val);
-            setMessages(messageHistory?.[val] || []);
-          }, 100);
-        }}
-        groupable
-        styles={{item: {padding: '0 8px'}}}
-        menu={(conversation) => ({
-          items: [
-            {
-              label: 'Rename',
-              key: 'rename',
-              icon: <EditOutlined/>,
-            },
-            {
-              label: 'Delete',
-              key: 'delete',
-              icon: <DeleteOutlined/>,
-              danger: true,
-              onClick: () => {
-                const newList = conversations.filter((item) => item.key !== conversation.key);
-                const newKey = newList?.[0]?.key;
-                setConversations(newList);
-                // The delete operation modifies curConversation and triggers onActiveChange, so it needs to be executed with a delay to ensure it overrides correctly at the end.
-                // This feature will be fixed in a future version.
-                setTimeout(() => {
-                  if (conversation.key === curConversation) {
-                    setCurConversation(newKey);
-                    setMessages(messageHistory?.[newKey] || []);
-                  }
-                }, 200);
-              },
-            },
-          ],
-        })}
-      />
+          {/* 底部头像 */}
+          <div className="collapsedAvatar">
+            <Avatar size={32}/>
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* 🌟 Logo */}
+          <div className={styles.logo}>
+            <div className="logoContent">
+              <img
+                src="https://mdn.alipayobjects.com/huamei_iwk9zp/afts/img/A*eco6RrQhxbMAAAAAAAAAAAAADgCCAQ/original"
+                draggable={false}
+                alt="logo"
+                width={24}
+                height={24}
+              />
+              <span>Ant Design X</span>
+            </div>
+            <Button
+              type="text"
+              icon={siderCollapsed ? <MenuUnfoldOutlined/> : <MenuFoldOutlined/>}
+              onClick={toggleSider}
+            />
+          </div>
 
-      <div className={styles.siderFooter}>
-        <Avatar size={24}/>
-        <Button type="text" icon={<QuestionCircleOutlined/>}/>
-      </div>
+          {/* 🌟 添加会话 */}
+          <Button
+            onClick={handleNewConversation}
+            type="link"
+            className={styles.addBtn}
+            icon={<PlusOutlined style={{fontSize: 16}}/>}
+          >
+            New Conversation
+          </Button>
+
+          {/* 🌟 会话管理 */}
+          <Conversations
+            items={conversations}
+            className={styles.conversations}
+            activeKey={curConversation}
+            onActiveChange={async (val) => {
+              abortController.current?.abort();
+              // The abort execution will trigger an asynchronous requestFallback, which may lead to timing issues.
+              // In future versions, the sessionId capability will be added to resolve this problem.
+              setTimeout(() => {
+                setCurConversation(val);
+                setMessages(messageHistory?.[val] || []);
+              }, 100);
+              setMobileSiderVisible(false);
+            }}
+            groupable
+            styles={{item: {padding: '0 8px'}}}
+            menu={(conversation) => ({
+              items: [
+                {
+                  label: 'Rename',
+                  key: 'rename',
+                  icon: <EditOutlined/>,
+                },
+                {
+                  label: 'Delete',
+                  key: 'delete',
+                  icon: <DeleteOutlined/>,
+                  danger: true,
+                  onClick: () => {
+                    const newList = conversations.filter((item) => item.key !== conversation.key);
+                    const newKey = newList?.[0]?.key;
+                    setConversations(newList);
+                    // The delete operation modifies curConversation and triggers onActiveChange, so it needs to be executed with a delay to ensure it overrides correctly at the end.
+                    // This feature will be fixed in a future version.
+                    setTimeout(() => {
+                      if (conversation.key === curConversation) {
+                        setCurConversation(newKey);
+                        setMessages(messageHistory?.[newKey] || []);
+                      }
+                    }, 200);
+                  },
+                },
+              ],
+            })}
+          />
+
+          <div className={styles.siderFooter}>
+            <Avatar size={24}/>
+            <Button
+              type="text"
+              icon={<QuestionCircleOutlined/>}
+              className="questionBtn"
+            />
+          </div>
+        </>
+      )}
     </div>
   );
+
   const chatList = (
     <div className={styles.chatList}>
       {messages?.length ? (
@@ -538,7 +801,7 @@ const Independent: React.FC = () => {
             }
 
           })}
-          style={{height: '100%', paddingInline: 'calc(calc(100% - 700px) /2)'}}
+          style={{height: '100%', paddingInline: 'calc(calc(100% - 900px) /2)'}}
           roles={{
             assistant: {
               placement: 'start',
@@ -559,7 +822,7 @@ const Independent: React.FC = () => {
         <Space
           direction="vertical"
           size={16}
-          style={{paddingInline: 'calc(calc(100% - 700px) /2)'}}
+          style={{paddingInline: 'calc(calc(100% - 900px) /2)'}}
           className={styles.placeholder}
         >
           <Welcome
@@ -574,13 +837,14 @@ const Independent: React.FC = () => {
               </Space>
             }
           />
-          <Flex gap={16}>
+          <Flex gap={16} wrap="wrap">
             <Prompts
               items={[HOT_TOPICS]}
               styles={{
                 list: {height: '100%'},
                 item: {
                   flex: 1,
+                  minWidth: 300,
                   backgroundImage: 'linear-gradient(123deg, #e5f4ff 0%, #efe7ff 100%)',
                   borderRadius: 12,
                   border: 'none',
@@ -598,6 +862,7 @@ const Independent: React.FC = () => {
               styles={{
                 item: {
                   flex: 1,
+                  minWidth: 300,
                   backgroundImage: 'linear-gradient(123deg, #e5f4ff 0%, #efe7ff 100%)',
                   borderRadius: 12,
                   border: 'none',
@@ -732,6 +997,25 @@ const Independent: React.FC = () => {
   // ==================== Render =================
   return (
     <div className={styles.layout}>
+      {/* 移动端头部 */}
+      <div className={styles.mobileHeader}>
+        <Button
+          icon={<MenuUnfoldOutlined />}
+          onClick={toggleMobileSider}
+        />
+        <Button
+          className={styles.newChatButton}
+          icon={<PlusOutlined />}
+          onClick={handleNewConversation}
+        />
+      </div>
+
+      {/* 移动端侧边栏遮罩 */}
+      {mobileSiderVisible && (
+        <div className={styles.overlay} onClick={() => setMobileSiderVisible(false)}/>
+      )}
+
+      {/* 侧边栏 */}
       {chatSider}
 
       <div className={styles.chat}>
