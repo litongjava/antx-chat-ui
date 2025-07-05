@@ -483,7 +483,7 @@ const Independent: React.FC = () => {
                 },
                 avatar: {icon: <OpenAIOutlined/>},
                 messageRender: content => renderMarkdown(content, i.message.reasoning_content ?? null),
-                typing: status === 'loading' ? {step: 5, interval: 20, suffix: <>💗</>} : false,
+                typing: status === 'loading' ? {step: 5, interval: 20, suffix: <Spin size="small"/>} : false,
               }
             }
 
@@ -492,6 +492,7 @@ const Independent: React.FC = () => {
           roles={{
             assistant: {
               placement: 'start',
+              variant: 'borderless',
               footer: (
                 <div style={{display: 'flex'}}>
                   <Button type="text" size="small" icon={<ReloadOutlined/>}/>
@@ -500,9 +501,8 @@ const Independent: React.FC = () => {
                   <Button type="text" size="small" icon={<DislikeOutlined/>}/>
                 </div>
               ),
-              loadingRender: () => <Spin size="small"/>,
             },
-            user: {placement: 'end'},
+            user: {placement: 'end', variant: 'borderless',},
           }}
         />
       ) : (
