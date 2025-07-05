@@ -21,7 +21,6 @@ import {
   ScheduleOutlined,
   ShareAltOutlined,
   SmileOutlined,
-  UserOutlined,
 } from '@ant-design/icons';
 import {Attachments, Bubble, Conversations, Prompts, Sender, useXAgent, useXChat, Welcome,} from '@ant-design/x';
 import {Avatar, Button, Collapse, Flex, type GetProp, message, Select, Space, Spin, Tag, Tooltip} from 'antd';
