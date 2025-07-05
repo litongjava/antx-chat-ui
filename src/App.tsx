@@ -174,7 +174,6 @@ const useStyle = createStyles(({token, css}) => {
         background: ${token.colorBgContainer};
         font-family: AlibabaPuHuiTi, ${token.fontFamily}, sans-serif;
     `,
-    // sider 样式
     sider: css`
         background: ${token.colorBgLayout}80;
         width: 280px;
@@ -680,7 +679,7 @@ const Independent: React.FC = () => {
 
         {tools.length > 0 && (
           <Tag className={styles.tag} icon={<PaperClipOutlined/>}>
-            {tools.length} 工具已启用
+            {tools.length} tools enabled
           </Tag>
         )}
       </div>
