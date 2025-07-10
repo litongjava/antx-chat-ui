@@ -11,9 +11,16 @@ const PrivateRoute = ({ children }: { children: React.ReactElement }) => {
   return user ? children : <Navigate to="/login" replace />;
 };
 
+// 修改：允许匿名用户访问公开页面
 const PublicRoute = ({ children }: { children: React.ReactElement }) => {
   const { user } = useUser();
-  return user ? <Navigate to="/" replace /> : children;
+
+  // 用户已登录且不是匿名用户时才重定向
+  if (user && user.type > 0) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
 };
 
 const AppRoutes = () => {

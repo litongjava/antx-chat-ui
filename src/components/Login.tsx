@@ -1,9 +1,10 @@
-import {useState} from 'react';
-import {Link, useNavigate} from 'react-router-dom';
-import {LockOutlined, MailOutlined} from '@ant-design/icons';
-import {Button, Form, Input, message} from 'antd';
-import {config} from '../config/config';
-import {useUser} from '../context/UserContext';
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { LockOutlined, MailOutlined } from '@ant-design/icons';
+import { Button, Form, Input, message } from 'antd';
+import { config } from '../config/config';
+import { useUser } from '../context/UserContext';
+import './Login.css';
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
@@ -18,19 +19,15 @@ const Login = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: values.email,
-          password: values.password
+          password: values.password,
         }),
       });
 
       const result = await response.json();
-      if (result.ok) {
-        const userData = result.data;
+      if (result.ok && result.data) {
         setUser({
-          user_id: userData.user_id,
-          token: userData.token,
-          refresh_token: userData.refresh_token,
-          expires_in: userData.expires_in,
-          type: 1 // 普通用户
+          ...result.data,
+          type: 1 // 登录后设置为普通用户
         });
         message.success('登录成功！');
         navigate('/');
@@ -49,13 +46,12 @@ const Login = () => {
     <div className="login-container">
       <div className="login-card">
         <div className="login-header">
-          <h1>登录</h1>
-          <p>欢迎回来，请登录您的账号</p>
+          <h1>欢迎回来</h1>
+          <p>请输入您的账号密码登录</p>
         </div>
 
         <Form
           name="login_form"
-          initialValues={{ remember: true }}
           onFinish={onFinish}
         >
           <Form.Item
