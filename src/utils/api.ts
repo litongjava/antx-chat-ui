@@ -1,7 +1,7 @@
 // 带认证头的请求封装
 export const authFetch = async (url: string, options: RequestInit = {}) => {
   // 从本地存储获取用户信息
-  const userData = localStorage.getItem('app_user');
+  const userData = localStorage.getItem('app_login_user');
 
   if (!userData) {
     throw new Error('用户未登录');
@@ -21,7 +21,7 @@ export const authFetch = async (url: string, options: RequestInit = {}) => {
 
 // 检查token是否过期
 export const isTokenExpired = (): boolean => {
-  const userData = localStorage.getItem('app_user');
+  const userData = localStorage.getItem('app_login_user');
 
   if (!userData) return true;
 
@@ -32,7 +32,7 @@ export const isTokenExpired = (): boolean => {
 
 // 刷新token
 export const refreshToken = async (): Promise<void> => {
-  const userData = localStorage.getItem('app_user');
+  const userData = localStorage.getItem('app_login_user');
 
   if (!userData) {
     throw new Error('用户未登录');
@@ -56,7 +56,7 @@ export const refreshToken = async (): Promise<void> => {
   if (result.ok && result.data) {
     // 更新本地存储
     const newUser = {...user, ...result.data};
-    localStorage.setItem('app_user', JSON.stringify(newUser));
+    localStorage.setItem('app_login_user', JSON.stringify(newUser));
   } else {
     throw new Error(result.msg || '刷新token失败');
   }

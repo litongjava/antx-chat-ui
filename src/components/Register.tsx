@@ -7,10 +7,15 @@ import {useUser} from '../context/UserContext';
 
 const Register = () => {
   const [loading, setLoading] = useState(false);
+  // 新增状态：管理密码错误信息
+  const [passwordErrorMessage, setPasswordErrorMessage] = useState<string | null>(null);
   const navigate = useNavigate();
   const {user} = useUser();
 
   const onFinish = async (values: { email: string; password: string; confirmPassword: string }) => {
+    // 提交时重置错误状态
+    setPasswordErrorMessage(null);
+
     if (values.password !== values.confirmPassword) {
       message.error('两次输入的密码不一致！');
       return;
@@ -35,6 +40,18 @@ const Register = () => {
         message.success('注册成功！');
         navigate('/login');
       } else {
+        // 处理密码验证错误
+        if (result.data && Array.isArray(result.data)) {
+          const passwordError = result.data.find(
+            (error: any) => error.field === 'password' && error.messages && error.messages.length > 0
+          );
+
+          if (passwordError) {
+            // 设置密码错误信息
+            setPasswordErrorMessage(passwordError.messages[0]);
+            return; // 不显示全局错误消息
+          }
+        }
         message.error(result.msg || '注册失败');
       }
     } catch (error) {
@@ -73,12 +90,28 @@ const Register = () => {
 
           <Form.Item
             name="password"
-            rules={[{required: true, message: '请输入您的密码!'}]}
+            // 添加验证状态和错误消息
+            validateStatus={passwordErrorMessage ? 'error' : undefined}
+            help={passwordErrorMessage}
+            rules={[
+              {required: true, message: '请输入您的密码!'},
+              // 添加清空错误的规则
+              () => ({
+                validator(_, __) {
+                  if (passwordErrorMessage) {
+                    setPasswordErrorMessage(null);
+                  }
+                  return Promise.resolve();
+                }
+              })
+            ]}
           >
             <Input.Password
               prefix={<LockOutlined/>}
               placeholder="密码"
               size="large"
+              // 输入时清除错误
+              onChange={() => passwordErrorMessage && setPasswordErrorMessage(null)}
             />
           </Form.Item>
 

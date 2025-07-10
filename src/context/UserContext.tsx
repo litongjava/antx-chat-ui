@@ -1,7 +1,7 @@
 import {createContext, useContext, useEffect, useState} from 'react';
 import {config} from "../config/config.ts";
 
-interface UserData {
+interface AppLoginUserData {
   user_id: string;
   token: string;
   refresh_token: string;
@@ -14,10 +14,10 @@ interface UserData {
 }
 
 interface UserContextType {
-  user: UserData | null;
+  user: AppLoginUserData | null;
   loading: boolean;
   error: string | null;
-  setUser: (user: UserData | null) => void;
+  setUser: (user: AppLoginUserData | null) => void;
 }
 
 const UserContext = createContext<UserContextType>({
@@ -28,15 +28,15 @@ const UserContext = createContext<UserContextType>({
 });
 
 export const UserProvider = ({children}: { children: React.ReactNode }) => {
-  const [user, setUserState] = useState<UserData | null>(null);
+  const [user, setUserState] = useState<AppLoginUserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const setUser = (userData: UserData | null) => {
+  const setUser = (userData: AppLoginUserData | null) => {
     if (userData) {
-      localStorage.setItem('app_user', JSON.stringify(userData));
+      localStorage.setItem('app_login_user', JSON.stringify(userData));
     } else {
-      localStorage.removeItem('app_user');
+      localStorage.removeItem('app_login_user');
     }
     setUserState(userData);
   };
@@ -59,7 +59,7 @@ export const UserProvider = ({children}: { children: React.ReactNode }) => {
         };
 
         // 检查本地是否已有用户数据
-        const storedUser = localStorage.getItem('app_user');
+        const storedUser = localStorage.getItem('app_login_user');
         if (storedUser) {
           setUser(JSON.parse(storedUser));
           setLoading(false);
