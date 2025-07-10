@@ -1,14 +1,11 @@
+// Chat.tsx
 import {
-  AppstoreAddOutlined,
   CloudUploadOutlined,
-  CommentOutlined,
   CopyOutlined,
   DeleteOutlined,
   DislikeOutlined,
   EditOutlined,
   EllipsisOutlined,
-  FileSearchOutlined,
-  HeartOutlined,
   LikeOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -18,173 +15,61 @@ import {
   ProductOutlined,
   QuestionCircleOutlined,
   ReloadOutlined,
-  ScheduleOutlined,
   ShareAltOutlined,
-  SmileOutlined,
 } from '@ant-design/icons';
-import { Attachments, Bubble, Conversations, Prompts, Sender, useXAgent, useXChat, Welcome } from '@ant-design/x';
-import { Avatar, Button, Collapse, Flex, type GetProp, message, Select, Space, Spin, Tag, Tooltip } from 'antd';
+import {Attachments, Bubble, Conversations, Prompts, Sender, useXAgent, useXChat, Welcome} from '@ant-design/x';
+import {Avatar, Button, Collapse, Flex, message, Select, Space, Spin, Tag, Tooltip} from 'antd';
 import dayjs from 'dayjs';
-import React, { useEffect, useRef, useState } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import markdownit from 'markdown-it';
-import './Chat.css'; // 导入CSS文件
+import './Chat.css';
+import {AttachmentFile, BubbleDataType, ConversationItem} from './types';
+import {
+  DEFAULT_CONVERSATIONS_ITEMS,
+  DESIGN_GUIDE,
+  HOT_TOPICS,
+  MODEL_OPTIONS,
+  SENDER_PROMPTS,
+  TOOL_OPTIONS
+} from './consts';
+import {MessageInfo} from "@ant-design/x/es/use-x-chat";
 
-const md = markdownit({ html: true, breaks: true });
+const md = markdownit({html: true, breaks: true});
 
 const renderMarkdown = (content: string, reasoning?: string | null) => (
-  <div>
+  <div className="markdown-content">
     {reasoning && (
       <Collapse
         defaultActiveKey={['1']}
-        style={{ marginTop: 12 }}
+        style={{marginTop: 12}}
         items={[
           {
             key: '1',
             label: 'Thought',
             children: (
               <div
-                dangerouslySetInnerHTML={{ __html: md.render(reasoning) }}
+                dangerouslySetInnerHTML={{__html: md.render(reasoning)}}
               />
             ),
           },
         ]}
       />
     )}
-    <div dangerouslySetInnerHTML={{ __html: md.render(content) }} />
+    <div dangerouslySetInnerHTML={{__html: md.render(content)}}/>
   </div>
 );
 
-type BubbleDataType = {
-  role: string;
-  content: string;
-  reasoning_content?: string | null;
-};
-
-const DEFAULT_CONVERSATIONS_ITEMS = [
-  {
-    key: 'default-0',
-    label: 'What is Ant Design X?',
-    group: 'Today',
-  },
-  {
-    key: 'default-1',
-    label: 'How to quickly install and import components?',
-    group: 'Today',
-  },
-  {
-    key: 'default-2',
-    label: 'New AGI Hybrid Interface',
-    group: 'Yesterday',
-  },
-];
-
-const HOT_TOPICS = {
-  key: '1',
-  label: 'Hot Topics',
-  children: [
-    {
-      key: '1-1',
-      description: 'What has Ant Design X upgraded?',
-      icon: <span style={{ color: '#f93a4a', fontWeight: 700 }}>1</span>,
-    },
-    {
-      key: '1-2',
-      description: 'New AGI Hybrid Interface',
-      icon: <span style={{ color: '#ff6565', fontWeight: 700 }}>2</span>,
-    },
-    {
-      key: '1-3',
-      description: 'What components are in Ant Design X?',
-      icon: <span style={{ color: '#ff8f1f', fontWeight: 700 }}>3</span>,
-    },
-    {
-      key: '1-4',
-      description: 'Come and discover the new design paradigm of the AI era.',
-      icon: <span style={{ color: '#00000040', fontWeight: 700 }}>4</span>,
-    },
-    {
-      key: '1-5',
-      description: 'How to quickly install and import components?',
-      icon: <span style={{ color: '#00000040', fontWeight: 700 }}>5</span>,
-    },
-  ],
-};
-
-const DESIGN_GUIDE = {
-  key: '2',
-  label: 'Design Guide',
-  children: [
-    {
-      key: '2-1',
-      icon: <HeartOutlined />,
-      label: 'Intention',
-      description: 'AI understands user needs and provides solutions.',
-    },
-    {
-      key: '2-2',
-      icon: <SmileOutlined />,
-      label: 'Role',
-      description: "AI's public persona and image",
-    },
-    {
-      key: '2-3',
-      icon: <CommentOutlined />,
-      label: 'Chat',
-      description: 'How AI Can Express Itself in a Way Users Understand',
-    },
-    {
-      key: '2-4',
-      icon: <PaperClipOutlined />,
-      label: 'Interface',
-      description: 'AI balances "chat" & "do" behaviors.',
-    },
-  ],
-};
-
-const SENDER_PROMPTS: GetProp<typeof Prompts, 'items'> = [
-  {
-    key: '1',
-    description: 'Upgrades',
-    icon: <ScheduleOutlined />,
-  },
-  {
-    key: '2',
-    description: 'Components',
-    icon: <ProductOutlined />,
-  },
-  {
-    key: '3',
-    description: 'RICH Guide',
-    icon: <FileSearchOutlined />,
-  },
-  {
-    key: '4',
-    description: 'Installation Introduction',
-    icon: <AppstoreAddOutlined />,
-  },
-];
-
-const MODEL_OPTIONS = [
-  { label: 'DeepSeek (R1)', value: 'deepseek-r1' },
-  { label: 'DeepSeek-R1-Distill-Qwen-7B', value: 'DeepSeek-R1-Distill-Qwen-7B' },
-];
-
-const TOOL_OPTIONS = [
-  { label: 'Search', value: 'search' },
-  { label: 'Linux', value: 'linux' },
-  { label: 'Translate', value: 'translate' },
-];
 const Chat: React.FC = () => {
   const abortController = useRef<AbortController>(null);
 
   // ==================== State ====================
-  const [messageHistory, setMessageHistory] = useState<Record<string, any>>({});
+  const [messageHistory, setMessageHistory] = useState<Record<string, MessageInfo<BubbleDataType>[]>>({});
 
-  const [conversations, setConversations] = useState(DEFAULT_CONVERSATIONS_ITEMS);
-  const [curConversation, setCurConversation] = useState(DEFAULT_CONVERSATIONS_ITEMS[0].key);
+  const [conversations, setConversations] = useState<ConversationItem[]>(DEFAULT_CONVERSATIONS_ITEMS);
+  const [curConversation, setCurConversation] = useState<string>(DEFAULT_CONVERSATIONS_ITEMS[0].key);
 
   const [attachmentsOpen, setAttachmentsOpen] = useState(false);
-  const [attachedFiles, setAttachedFiles] = useState<GetProp<typeof Attachments, 'items'>>([]);
+  const [attachedFiles, setAttachedFiles] = useState<AttachmentFile[]>([]);
 
   const [inputValue, setInputValue] = useState('');
 
@@ -205,9 +90,9 @@ const Chat: React.FC = () => {
     });
   const loading = agent.isRequesting();
 
-  const { onRequest, messages, setMessages } = useXChat({
+  const {onRequest, messages, setMessages} = useXChat({
     agent,
-    requestFallback: (_, { error }) => {
+    requestFallback: (_, {error}) => {
       if (error.name === 'AbortError') {
         return {
           content: 'Request is aborted',
@@ -220,7 +105,7 @@ const Chat: React.FC = () => {
       };
     },
     transformMessage: (info) => {
-      const { originMessage, chunk } = info || {};
+      const {originMessage, chunk} = info || {};
       let currentContent = '';
       let currentThink = '';
       try {
@@ -258,7 +143,7 @@ const Chat: React.FC = () => {
 
     onRequest({
       stream: true,
-      message: { role: 'user', content: val },
+      message: {role: 'user', content: val},
       model: model,
       tools: tools
     });
@@ -316,7 +201,7 @@ const Chat: React.FC = () => {
           <Button
             type="text"
             className="collapsedMenuButton"
-            icon={<MenuUnfoldOutlined style={{ fontSize: 20 }} />}
+            icon={<MenuUnfoldOutlined style={{fontSize: 20}}/>}
             onClick={toggleSider}
           />
 
@@ -326,13 +211,13 @@ const Chat: React.FC = () => {
             onClick={handleNewConversation}
           >
             <div className="newChatIcon">
-              <PlusOutlined />
+              <PlusOutlined/>
             </div>
           </div>
 
           {/* 底部头像 */}
           <div className="collapsedAvatar">
-            <Avatar size={32} />
+            <Avatar size={32}/>
           </div>
         </div>
       ) : (
@@ -351,7 +236,7 @@ const Chat: React.FC = () => {
             </div>
             <Button
               type="text"
-              icon={siderCollapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+              icon={siderCollapsed ? <MenuUnfoldOutlined/> : <MenuFoldOutlined/>}
               onClick={toggleSider}
             />
           </div>
@@ -361,7 +246,7 @@ const Chat: React.FC = () => {
             onClick={handleNewConversation}
             type="link"
             className="addBtn"
-            icon={<PlusOutlined style={{ fontSize: 16 }} />}
+            icon={<PlusOutlined style={{fontSize: 16}}/>}
           >
             New Conversation
           </Button>
@@ -382,18 +267,18 @@ const Chat: React.FC = () => {
               setMobileSiderVisible(false);
             }}
             groupable
-            styles={{ item: { padding: '0 8px' } }}
+            styles={{item: {padding: '0 8px'}}}
             menu={(conversation) => ({
               items: [
                 {
                   label: 'Rename',
                   key: 'rename',
-                  icon: <EditOutlined />,
+                  icon: <EditOutlined/>,
                 },
                 {
                   label: 'Delete',
                   key: 'delete',
-                  icon: <DeleteOutlined />,
+                  icon: <DeleteOutlined/>,
                   danger: true,
                   onClick: () => {
                     const newList = conversations.filter((item) => item.key !== conversation.key);
@@ -414,10 +299,10 @@ const Chat: React.FC = () => {
           />
 
           <div className="siderFooter">
-            <Avatar size={24} />
+            <Avatar size={24}/>
             <Button
               type="text"
-              icon={<QuestionCircleOutlined />}
+              icon={<QuestionCircleOutlined/>}
               className="questionBtn"
             />
           </div>
@@ -432,8 +317,7 @@ const Chat: React.FC = () => {
         /* 🌟 消息列表 */
         <Bubble.List
           items={messages?.map((i) => {
-            const { message, status } = i;
-            console.log("message", message);
+            const {message, status} = i;
             if (message?.role === 'user') {
               return {
                 ...i.message,
@@ -444,34 +328,34 @@ const Chat: React.FC = () => {
               return {
                 ...i.message,
                 className: status === 'loading' ? 'loadingMessage' : '',
-                messageRender: content => renderMarkdown(content, i.message.reasoning_content ?? null),
-                typing: status === 'loading' ? { step: 5, interval: 20, suffix: <Spin size="small" /> } : false,
+                messageRender: (content: string) => renderMarkdown(content, i.message.reasoning_content ?? null),
+                typing: status === 'loading' ? {step: 5, interval: 20, suffix: <Spin size="small"/>} : false,
               }
             }
 
           })}
-          style={{ height: '100%', paddingInline: 'calc(calc(100% - 900px) /2)' }}
+          style={{height: '100%', paddingInline: 'calc(calc(100% - 900px) /2)'}}
           roles={{
             assistant: {
               placement: 'start',
               variant: 'borderless',
               footer: (
-                <div style={{ display: 'flex' }}>
-                  <Button type="text" size="small" icon={<ReloadOutlined />} />
-                  <Button type="text" size="small" icon={<CopyOutlined />} />
-                  <Button type="text" size="small" icon={<LikeOutlined />} />
-                  <Button type="text" size="small" icon={<DislikeOutlined />} />
+                <div style={{display: 'flex'}}>
+                  <Button type="text" size="small" icon={<ReloadOutlined/>}/>
+                  <Button type="text" size="small" icon={<CopyOutlined/>}/>
+                  <Button type="text" size="small" icon={<LikeOutlined/>}/>
+                  <Button type="text" size="small" icon={<DislikeOutlined/>}/>
                 </div>
               ),
             },
-            user: { placement: 'end', variant: 'borderless', },
+            user: {placement: 'end', variant: 'borderless',},
           }}
         />
       ) : (
         <Space
           direction="vertical"
           size={16}
-          style={{ paddingInline: 'calc(calc(100% - 900px) /2)' }}
+          style={{paddingInline: 'calc(calc(100% - 900px) /2)'}}
           className="placeholder"
         >
           <Welcome
@@ -481,8 +365,8 @@ const Chat: React.FC = () => {
             description="Base on Ant Design, AGI product interface solution, create a better intelligent vision~"
             extra={
               <Space>
-                <Button icon={<ShareAltOutlined />} />
-                <Button icon={<EllipsisOutlined />} />
+                <Button icon={<ShareAltOutlined/>}/>
+                <Button icon={<EllipsisOutlined/>}/>
               </Space>
             }
           />
@@ -490,7 +374,7 @@ const Chat: React.FC = () => {
             <Prompts
               items={[HOT_TOPICS]}
               styles={{
-                list: { height: '100%' },
+                list: {height: '100%'},
                 item: {
                   flex: 1,
                   minWidth: 300,
@@ -498,7 +382,7 @@ const Chat: React.FC = () => {
                   borderRadius: 12,
                   border: 'none',
                 },
-                subItem: { padding: 0, background: 'transparent' },
+                subItem: {padding: 0, background: 'transparent'},
               }}
               onItemClick={(info) => {
                 onSubmit(info.data.description as string);
@@ -516,7 +400,7 @@ const Chat: React.FC = () => {
                   borderRadius: 12,
                   border: 'none',
                 },
-                subItem: { background: '#ffffffa6' },
+                subItem: {background: '#ffffffa6'},
               }}
               onItemClick={(info) => {
                 onSubmit(info.data.description as string);
@@ -533,7 +417,7 @@ const Chat: React.FC = () => {
       title="Upload File"
       open={attachmentsOpen}
       onOpenChange={setAttachmentsOpen}
-      styles={{ content: { padding: 0 } }}
+      styles={{content: {padding: 0}}}
     >
       <Attachments
         beforeUpload={() => false}
@@ -541,9 +425,9 @@ const Chat: React.FC = () => {
         onChange={(info) => setAttachedFiles(info.fileList)}
         placeholder={(type) =>
           type === 'drop'
-            ? { title: 'Drop file here' }
+            ? {title: 'Drop file here'}
             : {
-              icon: <CloudUploadOutlined />,
+              icon: <CloudUploadOutlined/>,
               title: 'Upload files',
               description: 'Click or drag files to this area to upload',
             }
@@ -560,7 +444,7 @@ const Chat: React.FC = () => {
           onSubmit(info.data.description as string);
         }}
         styles={{
-          item: { padding: '6px 12px' },
+          item: {padding: '6px 12px'},
         }}
         className="senderPrompt"
       />
@@ -571,8 +455,8 @@ const Chat: React.FC = () => {
               value={model}
               onChange={setModel}
               options={MODEL_OPTIONS}
-              suffixIcon={<OpenAIOutlined />}
-              dropdownStyle={{ minWidth: 240 }}
+              suffixIcon={<OpenAIOutlined/>}
+              dropdownStyle={{minWidth: 240}}
             />
           </div>
         </Tooltip>
@@ -584,14 +468,14 @@ const Chat: React.FC = () => {
               onChange={(vals) => setTools(vals as string[])}
               options={TOOL_OPTIONS}
               mode="multiple"
-              suffixIcon={<ProductOutlined />}
-              dropdownStyle={{ minWidth: 180 }}
+              suffixIcon={<ProductOutlined/>}
+              dropdownStyle={{minWidth: 180}}
             />
           </div>
         </Tooltip>
 
         {tools.length > 0 && (
-          <Tag className="tag" icon={<PaperClipOutlined />}>
+          <Tag className="tag" icon={<PaperClipOutlined/>}>
             {tools.length} tools enabled
           </Tag>
         )}
@@ -611,7 +495,7 @@ const Chat: React.FC = () => {
         prefix={
           <Button
             type="text"
-            icon={<PaperClipOutlined style={{ fontSize: 18 }} />}
+            icon={<PaperClipOutlined style={{fontSize: 18}}/>}
             onClick={() => setAttachmentsOpen(!attachmentsOpen)}
           />
         }
@@ -619,11 +503,11 @@ const Chat: React.FC = () => {
         className="sender"
         allowSpeech
         actions={(_, info) => {
-          const { SendButton, LoadingButton, SpeechButton } = info.components;
+          const {SendButton, LoadingButton, SpeechButton} = info.components;
           return (
             <Flex gap={4}>
-              <SpeechButton className="speechButton" />
-              {loading ? <LoadingButton type="default" /> : <SendButton type="primary" />}
+              <SpeechButton className="speechButton"/>
+              {loading ? <LoadingButton type="default"/> : <SendButton type="primary"/>}
             </Flex>
           );
         }}
@@ -648,19 +532,19 @@ const Chat: React.FC = () => {
       {/* 移动端头部 */}
       <div className="mobileHeader">
         <Button
-          icon={<MenuUnfoldOutlined />}
+          icon={<MenuUnfoldOutlined/>}
           onClick={toggleMobileSider}
         />
         <Button
           className="newChatButton"
-          icon={<PlusOutlined />}
+          icon={<PlusOutlined/>}
           onClick={handleNewConversation}
         />
       </div>
 
       {/* 移动端侧边栏遮罩 */}
       {mobileSiderVisible && (
-        <div className="overlay" onClick={() => setMobileSiderVisible(false)} />
+        <div className="overlay" onClick={() => setMobileSiderVisible(false)}/>
       )}
 
       {/* 侧边栏 */}
