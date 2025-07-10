@@ -1,0 +1,43 @@
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-size: 1.5rem;
+    color: #666;
+}
+
+.error-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    padding: 20px;
+    text-align: center;
+}
+
+.error-container h2 {
+    color: #e74c3c;
+    margin-bottom: 15px;
+}
+
+.error-container p {
+    margin-bottom: 20px;
+    color: #555;
+}
+
+.error-container button {
+    padding: 10px 20px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s;
+}
+
+.error-container button:hover {
+    background-color: #2980b9;
+}
