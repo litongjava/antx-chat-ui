@@ -41,3 +41,13 @@
 .error-container button:hover {
     background-color: #2980b9;
 }
+
+/* 在已有样式后添加 */
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-size: 1.5rem;
+    color: #666;
+}

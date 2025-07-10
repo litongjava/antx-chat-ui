@@ -8,31 +8,58 @@ interface UserData {
   expires_in: number;
   //0 匿名 1 普通用户 2 高级用户
   type: number;
+  display_name?: string;
+  email?: string;
+  photo_url?: string;
 }
 
 interface UserContextType {
   user: UserData | null;
   loading: boolean;
   error: string | null;
+  setUser: (user: UserData | null) => void;
 }
 
 const UserContext = createContext<UserContextType>({
   user: null,
   loading: true,
-  error: null
+  error: null,
+  setUser: () => {}
 });
 
 export const UserProvider = ({children}: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<UserData | null>(null);
+  const [user, setUserState] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const setUser = (userData: UserData | null) => {
+    if (userData) {
+      localStorage.setItem('app_user', JSON.stringify(userData));
+    } else {
+      localStorage.removeItem('app_user');
+    }
+    setUserState(userData);
+  };
+
   useEffect(() => {
-    const anonymousLogin = async () => {
+    const initializeAuth = async () => {
       try {
+        // 添加请求拦截器添加认证头
+        const originalFetch = window.fetch;
+        window.fetch = async (...args) => {
+          const [input, init] = args;
+          const headers = new Headers(init?.headers);
+
+          if (user?.token) {
+            headers.set('Authorization', `Bearer ${user.token}`);
+          }
+
+          const newInit = init ? { ...init, headers } : { headers };
+          return originalFetch(input, newInit);
+        };
+
         // 检查本地是否已有用户数据
         const storedUser = localStorage.getItem('app_user');
-
         if (storedUser) {
           setUser(JSON.parse(storedUser));
           setLoading(false);
@@ -46,11 +73,13 @@ export const UserProvider = ({children}: { children: React.ReactNode }) => {
         }
 
         const result = await response.json();
-
         if (result.ok && result.data) {
           // 保存到本地存储和状态
-          localStorage.setItem('app_user', JSON.stringify(result.data));
-          setUser(result.data);
+          const anonymousUser = {
+            ...result.data,
+            type: 0 // 匿名用户
+          };
+          setUser(anonymousUser);
         } else {
           throw new Error(result.msg || '未知错误');
         }
@@ -62,11 +91,11 @@ export const UserProvider = ({children}: { children: React.ReactNode }) => {
       }
     };
 
-    anonymousLogin();
+    initializeAuth();
   }, []);
 
   return (
-    <UserContext.Provider value={{user, loading, error}}>
+    <UserContext.Provider value={{user, loading, error, setUser}}>
       {children}
     </UserContext.Provider>
   );

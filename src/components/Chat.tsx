@@ -18,7 +18,7 @@ import {
   ShareAltOutlined,
 } from '@ant-design/icons';
 import {Attachments, Bubble, Conversations, Prompts, Sender, useXAgent, useXChat, Welcome} from '@ant-design/x';
-import {Avatar, Button, Collapse, Flex, message, Select, Space, Spin, Tag, Tooltip} from 'antd';
+import {Button, Collapse, Flex, message, Select, Space, Spin, Tag, Tooltip} from 'antd';
 import dayjs from 'dayjs';
 import React, {useEffect, useRef, useState} from 'react';
 import markdownit from 'markdown-it';
@@ -33,6 +33,7 @@ import {
   TOOL_OPTIONS
 } from './consts';
 import {MessageInfo} from "@ant-design/x/es/use-x-chat";
+import UserAvatar from './UserAvatar';
 
 const md = markdownit({html: true, breaks: true});
 
@@ -217,7 +218,7 @@ const Chat: React.FC = () => {
 
           {/* 底部头像 */}
           <div className="collapsedAvatar">
-            <Avatar size={32}/>
+            <UserAvatar />
           </div>
         </div>
       ) : (
@@ -299,7 +300,7 @@ const Chat: React.FC = () => {
           />
 
           <div className="siderFooter">
-            <Avatar size={24}/>
+            <UserAvatar />
             <Button
               type="text"
               icon={<QuestionCircleOutlined/>}
@@ -456,7 +457,7 @@ const Chat: React.FC = () => {
               onChange={setModel}
               options={MODEL_OPTIONS}
               suffixIcon={<OpenAIOutlined/>}
-              dropdownStyle={{minWidth: 240}}
+              styles={{ popup: { root: { minWidth: 180 } } }}
             />
           </div>
         </Tooltip>
@@ -469,7 +470,7 @@ const Chat: React.FC = () => {
               options={TOOL_OPTIONS}
               mode="multiple"
               suffixIcon={<ProductOutlined/>}
-              dropdownStyle={{minWidth: 180}}
+              styles={{ popup: { root: { minWidth: 180 } } }}
             />
           </div>
         </Tooltip>

@@ -1,8 +1,9 @@
-import {useUser} from './context/UserContext';
+import AppRoutes from './Routes';
+import { useUser } from './context/UserContext';
 import './App.css';
-import Chat from "./components/Chat.tsx";
+
 function App() {
-  const {loading, error} = useUser();
+  const { loading, error } = useUser();
 
   if (loading) {
     return <div className="loading-container">初始化中...</div>;
@@ -17,9 +18,8 @@ function App() {
       </div>
     );
   }
-  return <>
-    <Chat/>
-  </>
+
+  return <AppRoutes />;
 }
 
 export default App;
