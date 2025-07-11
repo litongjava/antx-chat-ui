@@ -1,7 +1,7 @@
 import {useEffect, useState} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
 import {Button, message, Result, Spin} from 'antd';
-import {config} from '../config/config';
+import {config} from '../../config/config.ts';
 
 const Verification = () => {
   const [searchParams] = useSearchParams();

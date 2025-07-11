@@ -2,8 +2,8 @@
 import {useNavigate} from 'react-router-dom';
 import {Avatar, Dropdown, MenuProps, message} from 'antd';
 import {LoginOutlined, LogoutOutlined, UserAddOutlined, UserOutlined} from '@ant-design/icons';
-import {useUser} from '../context/UserContext';
-import {config} from "../config/config.ts";
+import {useUser} from '../../context/UserContext.tsx';
+import {config} from "../../config/config.ts";
 
 const UserAvatar = () => {
   const {user, setUser} = useUser();

@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { LockOutlined, MailOutlined } from '@ant-design/icons';
 import { Button, Form, Input, message } from 'antd';
-import { config } from '../config/config';
-import { useUser } from '../context/UserContext';
+import { config } from '../../config/config.ts';
+import { useUser } from '../../context/UserContext.tsx';
 import './Login.css';
 
 const Login = () => {

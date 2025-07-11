@@ -5,12 +5,12 @@ import {Button, message} from 'antd';
 import dayjs from 'dayjs';
 import React, {useEffect, useRef, useState} from 'react';
 import './Chat.css';
-import {AttachmentFile, BubbleDataType, ConversationItem} from './types';
-import {DEFAULT_CONVERSATIONS_ITEMS} from './consts';
+import {AttachmentFile, BubbleDataType, ConversationItem} from './types.ts';
+import {DEFAULT_CONVERSATIONS_ITEMS} from './consts.tsx';
 import {MessageInfo} from "@ant-design/x/es/use-x-chat";
-import ChatSider from './ChatSider';
-import ChatList from './ChatList'; // 新增
-import ChatSender from './ChatSender'; // 新增
+import ChatSider from './ChatSider.tsx';
+import ChatMessageList from './ChatMessageList.tsx'; // 新增
+import ChatSender from './ChatSender.tsx'; // 新增
 
 const Chat: React.FC = () => {
   const abortController = useRef<AbortController>(null);
@@ -178,8 +178,8 @@ const Chat: React.FC = () => {
       />
 
       <div className="chat">
-        {/* 使用 ChatList 组件 */}
-        <ChatList
+        {/* 使用 ChatMessageList 组件 */}
+        <ChatMessageList
           messages={messages}
           onSubmit={onSubmit}
         />

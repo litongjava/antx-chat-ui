@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Avatar, Button, Card, Form, Input, message, Modal, Spin, Upload } from 'antd';
 import { LoadingOutlined, UserOutlined } from '@ant-design/icons';
-import { useUser } from '../context/UserContext';
-import { config } from '../config/config';
+import { useUser } from '../../context/UserContext.tsx';
+import { config } from '../../config/config.ts';
 import './UserProfile.css';
 
 const UserProfile = () => {

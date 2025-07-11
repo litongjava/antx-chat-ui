@@ -10,7 +10,7 @@ import {
 } from '@ant-design/icons';
 import { Conversations } from '@ant-design/x';
 import { Button} from 'antd';
-import UserAvatar from './UserAvatar';
+import UserAvatar from '../user/UserAvatar.tsx';
 import {MessageInfo} from "@ant-design/x/es/use-x-chat";
 import {BubbleDataType} from "./types.ts";
 

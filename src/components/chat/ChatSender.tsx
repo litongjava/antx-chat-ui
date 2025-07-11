@@ -3,8 +3,8 @@ import React from 'react';
 import {Attachments, Prompts, Sender} from '@ant-design/x';
 import {Button, Flex, Select, Tag, Tooltip} from 'antd';
 import {CloudUploadOutlined, OpenAIOutlined, PaperClipOutlined, ProductOutlined,} from '@ant-design/icons';
-import {MODEL_OPTIONS, SENDER_PROMPTS, TOOL_OPTIONS} from './consts';
-import {AttachmentFile} from './types';
+import {MODEL_OPTIONS, SENDER_PROMPTS, TOOL_OPTIONS} from './consts.tsx';
+import {AttachmentFile} from './types.ts';
 
 interface ChatSenderProps {
   inputValue: string;

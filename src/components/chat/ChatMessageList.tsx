@@ -1,11 +1,11 @@
-// ChatList.tsx
+// ChatMessageList.tsx
 import React from 'react';
 import {Prompts, Welcome} from '@ant-design/x';
 import {Button, Collapse, Flex, Space, Spin} from 'antd';
 import {Bubble} from '@ant-design/x/es';
 import {MessageInfo} from '@ant-design/x/es/use-x-chat';
-import {BubbleDataType} from './types';
-import {DESIGN_GUIDE, HOT_TOPICS} from './consts';
+import {BubbleDataType} from './types.ts';
+import {DESIGN_GUIDE, HOT_TOPICS} from './consts.tsx';
 import ReloadOutlined from '@ant-design/icons/lib/icons/ReloadOutlined';
 import {CopyOutlined, DislikeOutlined, EllipsisOutlined, LikeOutlined, ShareAltOutlined} from "@ant-design/icons";
 import markdownit from "markdown-it";
@@ -39,7 +39,7 @@ export const renderMarkdown = (content: string, reasoning?: string | null) => (
     <div dangerouslySetInnerHTML={{__html: md.render(content)}}/>
   </div>
 );
-const ChatList: React.FC<ChatListProps> = ({messages, onSubmit}) => {
+const ChatMessageList: React.FC<ChatListProps> = ({messages, onSubmit}) => {
   return (
     <div className="chatList">
       {messages?.length ? (
@@ -143,4 +143,4 @@ const ChatList: React.FC<ChatListProps> = ({messages, onSubmit}) => {
   );
 };
 
-export default ChatList;
+export default ChatMessageList;

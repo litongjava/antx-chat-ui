@@ -1,11 +1,11 @@
 import React from 'react';
 import {Navigate, Route, Routes} from 'react-router-dom';
 import {useUser} from './context/UserContext';
-import Chat from './components/Chat';
-import Login from './components/Login';
-import Register from './components/Register';
-import Verification from './components/Verification';
-import UserProfile from "./components/UserProfile.tsx";
+import Chat from './components/chat/Chat.tsx';
+import Login from './components/user/Login.tsx';
+import Register from './components/user/Register.tsx';
+import Verification from './components/user/Verification.tsx';
+import UserProfile from "./components/user/UserProfile.tsx";
 
 const PrivateRoute = ({children}: { children: React.ReactElement }) => {
   const {user} = useUser();
