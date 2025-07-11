@@ -1,19 +1,26 @@
 // Chat.tsx
 import {MenuUnfoldOutlined, PlusOutlined,} from '@ant-design/icons';
-import {useXAgent, useXChat} from '@ant-design/x';
 import {Button, message} from 'antd';
 import dayjs from 'dayjs';
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import './Chat.css';
 import {AttachmentFile, BubbleDataType, ConversationItem} from './types.ts';
 import {DEFAULT_CONVERSATIONS_ITEMS} from './consts.tsx';
 import {MessageInfo} from "@ant-design/x/es/use-x-chat";
 import ChatSider from './ChatSider.tsx';
 import ChatMessageList from './ChatMessageList.tsx'; // 新增
-import ChatSender from './ChatSender.tsx'; // 新增
+import ChatSender from './ChatSender.tsx';
+import useChatService from "./useChatService.ts"; // 新增
+
 
 const Chat: React.FC = () => {
-  const abortController = useRef<AbortController>(null);
+  const {
+    messages,
+    setMessages,
+    loading,
+    sendMessage,
+    agent,
+  } = useChatService();
 
   // ==================== State ====================
   const [messageHistory, setMessageHistory] = useState<Record<string, MessageInfo<BubbleDataType>[]>>({});
@@ -31,58 +38,6 @@ const Chat: React.FC = () => {
   const [siderCollapsed, setSiderCollapsed] = useState(false);
   const [mobileSiderVisible, setMobileSiderVisible] = useState(false);
 
-  /**
-   * 🔔 Please replace the BASE_URL, PATH, MODEL, API_KEY with your own values.
-   */
-    // ==================== Runtime ====================
-  const [agent] = useXAgent<BubbleDataType>({
-      baseURL: 'https://api.x.ant.design/api/llm_siliconflow_deepSeek-r1-distill-1wen-7b',
-      model: 'DeepSeek-R1-Distill-Qwen-7B',
-      dangerouslyApiKey: 'Bearer sk-xxxxxxxxxxxxxxxxxxxx',
-    });
-  const loading = agent.isRequesting();
-
-  const {onRequest, messages, setMessages} = useXChat({
-    agent,
-    requestFallback: (_, {error}) => {
-      if (error.name === 'AbortError') {
-        return {
-          content: 'Request is aborted',
-          role: 'assistant',
-        };
-      }
-      return {
-        content: 'Request failed, please try again!',
-        role: 'assistant',
-      };
-    },
-    transformMessage: (info) => {
-      const {originMessage, chunk} = info || {};
-      let currentContent = '';
-      let currentThink = '';
-      try {
-        if (chunk?.data && !chunk?.data.includes('DONE')) {
-          const message = JSON.parse(chunk?.data);
-          currentThink = message?.choices?.[0]?.delta?.reasoning_content || '';
-          currentContent = message?.choices?.[0]?.delta?.content || '';
-        }
-      } catch (error) {
-        console.error(error);
-      }
-
-      const content = `${originMessage?.content || ''}${currentContent}`;
-      const reasoning_content = `${originMessage?.reasoning_content || ''}${currentThink}`;
-
-      return {
-        content: content,
-        reasoning_content: reasoning_content,
-        role: 'assistant',
-      };
-    },
-    resolveAbortController: (controller) => {
-      abortController.current = controller;
-    },
-  });
 
   // ==================== Event ====================
   const onSubmit = (val: string) => {
@@ -93,12 +48,10 @@ const Chat: React.FC = () => {
       return;
     }
 
-    onRequest({
-      stream: true,
-      message: {role: 'user', content: val},
-      model: model,
-      tools: tools
-    });
+    const success = sendMessage(val, model, tools);
+    if (!success) {
+      message.error('Failed to send message');
+    }
   };
 
   const toggleSider = () => {
