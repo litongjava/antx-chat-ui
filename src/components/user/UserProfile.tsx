@@ -5,6 +5,7 @@ import { LoadingOutlined, UserOutlined } from '@ant-design/icons';
 import { useUser } from '../../context/UserContext.tsx';
 import { config } from '../../config/config.ts';
 import './UserProfile.css';
+import {showError} from "../../utils/ErrorUtils.ts";
 
 const UserProfile = () => {
   const [form] = Form.useForm();
@@ -16,16 +17,6 @@ const UserProfile = () => {
   const [passwordModalVisible, setPasswordModalVisible] = useState(false);
   const { user, setUser } = useUser();
   const navigate = useNavigate();
-
-  const showError = (error: unknown, defaultMsg: string) => {
-    if (error instanceof Error) {
-      message.error(error.message || defaultMsg);
-    } else if (typeof error === 'string') {
-      message.error(error);
-    } else {
-      message.error(defaultMsg);
-    }
-  };
 
   useEffect(() => {
     const fetchUserProfile = async () => {

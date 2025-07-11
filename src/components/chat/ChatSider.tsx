@@ -8,8 +8,8 @@ import {
   PlusOutlined,
   QuestionCircleOutlined
 } from '@ant-design/icons';
-import { Conversations } from '@ant-design/x';
-import { Button} from 'antd';
+import {Conversation, Conversations} from '@ant-design/x';
+import {Button} from 'antd';
 import UserAvatar from '../user/UserAvatar.tsx';
 import {MessageInfo} from "@ant-design/x/es/use-x-chat";
 import {BubbleDataType} from "./types.ts";
@@ -29,9 +29,11 @@ interface ChatSiderProps {
   curConversation: string;
   setCurConversation: (key: string) => void;
   setConversations: (items: ConversationItem[]) => void;
-  setMessages: (messages:  MessageInfo<BubbleDataType>[]) => void;
+  setMessages: (messages: MessageInfo<BubbleDataType>[]) => void;
   messageHistory: Record<string, MessageInfo<BubbleDataType>[]>;
   handleNewConversation: () => void;
+  onRename: (sessionId: string, newName: string) => void;
+  onDelete: (sessionId: string) => void;
 }
 
 const ChatSider: React.FC<ChatSiderProps> = ({
@@ -42,11 +44,25 @@ const ChatSider: React.FC<ChatSiderProps> = ({
                                                conversations,
                                                curConversation,
                                                setCurConversation,
-                                               setConversations,
                                                setMessages,
                                                messageHistory,
-                                               handleNewConversation
+                                               handleNewConversation,
+                                               onRename,
+                                               onDelete
                                              }) => {
+  const handleRename = (conversation: Conversation) => {
+    // 如果 label 本来就是 string 就用它，否则 fallback 为空串
+    const defaultName =
+      typeof conversation.label === 'string'
+        ? conversation.label
+        : String(conversation.label) || '';
+
+    const newName = prompt('输入新会话名称', defaultName);
+    if (newName && newName.trim()) {
+      onRename(conversation.key, newName.trim());
+    }
+  };
+
   return (
     <div
       className={`sider ${siderCollapsed ? 'collapsed' : ''} ${mobileSiderVisible ? 'mobileVisible' : ''}`}
@@ -66,7 +82,7 @@ const ChatSider: React.FC<ChatSiderProps> = ({
           <Button
             type="text"
             className="collapsedMenuButton"
-            icon={<MenuUnfoldOutlined style={{ fontSize: 20 }} />}
+            icon={<MenuUnfoldOutlined style={{fontSize: 20}}/>}
             onClick={toggleSider}
           />
 
@@ -75,12 +91,12 @@ const ChatSider: React.FC<ChatSiderProps> = ({
             onClick={handleNewConversation}
           >
             <div className="newChatIcon">
-              <PlusOutlined />
+              <PlusOutlined/>
             </div>
           </div>
 
           <div className="collapsedAvatar">
-            <UserAvatar />
+            <UserAvatar/>
           </div>
         </div>
       ) : (
@@ -98,7 +114,7 @@ const ChatSider: React.FC<ChatSiderProps> = ({
             </div>
             <Button
               type="text"
-              icon={siderCollapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+              icon={siderCollapsed ? <MenuUnfoldOutlined/> : <MenuFoldOutlined/>}
               onClick={toggleSider}
             />
           </div>
@@ -107,7 +123,7 @@ const ChatSider: React.FC<ChatSiderProps> = ({
             onClick={handleNewConversation}
             type="link"
             className="addBtn"
-            icon={<PlusOutlined style={{ fontSize: 16 }} />}
+            icon={<PlusOutlined style={{fontSize: 16}}/>}
           >
             New Conversation
           </Button>
@@ -125,40 +141,34 @@ const ChatSider: React.FC<ChatSiderProps> = ({
               setMobileSiderVisible(false);
             }}
             groupable
-            styles={{ item: { padding: '0 8px' } }}
+            styles={{item: {padding: '0 8px'}}}
             menu={(conversation) => ({
               items: [
                 {
-                  label: 'Rename',
+                  label: '重命名',
                   key: 'rename',
-                  icon: <EditOutlined />,
+                  icon: <EditOutlined/>,
+                  onClick: () => handleRename(conversation)
                 },
                 {
-                  label: 'Delete',
+                  label: '删除',
                   key: 'delete',
-                  icon: <DeleteOutlined />,
+                  icon: <DeleteOutlined/>,
                   danger: true,
                   onClick: () => {
-                    const newList = conversations.filter((item) => item.key !== conversation.key);
-                    const newKey = newList?.[0]?.key;
-                    setConversations(newList);
-                    setTimeout(() => {
-                      if (conversation.key === curConversation) {
-                        setCurConversation(newKey);
-                        setMessages(messageHistory?.[newKey] || []);
-                      }
-                    }, 200);
-                  },
+                    if (window.confirm('确定要删除此会话吗？')) {
+                      onDelete(conversation.key);
+                    }
+                  }
                 },
               ],
             })}
           />
-
           <div className="siderFooter">
-            <UserAvatar />
+            <UserAvatar/>
             <Button
               type="text"
-              icon={<QuestionCircleOutlined />}
+              icon={<QuestionCircleOutlined/>}
               className="questionBtn"
             />
           </div>
