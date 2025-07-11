@@ -4,7 +4,8 @@
     height: 100vh;
     display: flex;
     background: var(--colorBgContainer);
-    font-family: AlibabaPuHuiTi, var(--fontFamily), sans-serif;
+    font-family: AlibabaPuHuiTi,-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+
     position: relative;
 }
 
@@ -385,8 +386,4 @@
 .markdown-content p {
     font-size: 16px;
     line-height: 1.6;
-}
-
-.markdown-content pre {
-    font-size: 14px;
 }

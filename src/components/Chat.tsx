@@ -1,60 +1,16 @@
 // Chat.tsx
-import {
-  CloudUploadOutlined,
-  CopyOutlined,
-  DislikeOutlined,
-  EllipsisOutlined,
-  LikeOutlined,
-  MenuUnfoldOutlined,
-  OpenAIOutlined,
-  PaperClipOutlined,
-  PlusOutlined,
-  ProductOutlined,
-  ReloadOutlined,
-  ShareAltOutlined,
-} from '@ant-design/icons';
-import {Attachments, Bubble, Prompts, Sender, useXAgent, useXChat, Welcome} from '@ant-design/x';
-import {Button, Collapse, Flex, message, Select, Space, Spin, Tag, Tooltip} from 'antd';
+import {MenuUnfoldOutlined, PlusOutlined,} from '@ant-design/icons';
+import {useXAgent, useXChat} from '@ant-design/x';
+import {Button, message} from 'antd';
 import dayjs from 'dayjs';
 import React, {useEffect, useRef, useState} from 'react';
-import markdownit from 'markdown-it';
 import './Chat.css';
 import {AttachmentFile, BubbleDataType, ConversationItem} from './types';
-import {
-  DEFAULT_CONVERSATIONS_ITEMS,
-  DESIGN_GUIDE,
-  HOT_TOPICS,
-  MODEL_OPTIONS,
-  SENDER_PROMPTS,
-  TOOL_OPTIONS
-} from './consts';
+import {DEFAULT_CONVERSATIONS_ITEMS} from './consts';
 import {MessageInfo} from "@ant-design/x/es/use-x-chat";
 import ChatSider from './ChatSider';
-
-const md = markdownit({html: true, breaks: true});
-
-const renderMarkdown = (content: string, reasoning?: string | null) => (
-  <div className="markdown-content">
-    {reasoning && (
-      <Collapse
-        defaultActiveKey={['1']}
-        style={{marginTop: 12}}
-        items={[
-          {
-            key: '1',
-            label: 'Thought',
-            children: (
-              <div
-                dangerouslySetInnerHTML={{__html: md.render(reasoning)}}
-              />
-            ),
-          },
-        ]}
-      />
-    )}
-    <div dangerouslySetInnerHTML={{__html: md.render(content)}}/>
-  </div>
-);
+import ChatList from './ChatList'; // 新增
+import ChatSender from './ChatSender'; // 新增
 
 const Chat: React.FC = () => {
   const abortController = useRef<AbortController>(null);
@@ -78,7 +34,6 @@ const Chat: React.FC = () => {
   /**
    * 🔔 Please replace the BASE_URL, PATH, MODEL, API_KEY with your own values.
    */
-
     // ==================== Runtime ====================
   const [agent] = useXAgent<BubbleDataType>({
       baseURL: 'https://api.x.ant.design/api/llm_siliconflow_deepSeek-r1-distill-1wen-7b',
@@ -176,213 +131,6 @@ const Chat: React.FC = () => {
     setMobileSiderVisible(false);
   };
 
-
-
-  const chatList = (
-    <div className="chatList">
-      {messages?.length ? (
-        /* 🌟 消息列表 */
-        <Bubble.List
-          items={messages?.map((i) => {
-            const {message, status} = i;
-            if (message?.role === 'user') {
-              return {
-                ...i.message,
-                className: status === 'loading' ? 'loadingMessage' : '',
-                messageRender: renderMarkdown,
-              }
-            } else {
-              return {
-                ...i.message,
-                className: status === 'loading' ? 'loadingMessage' : '',
-                messageRender: (content: string) => renderMarkdown(content, i.message.reasoning_content ?? null),
-                typing: status === 'loading' ? {step: 5, interval: 20, suffix: <Spin size="small"/>} : false,
-              }
-            }
-
-          })}
-          style={{height: '100%', paddingInline: 'calc(calc(100% - 900px) /2)'}}
-          roles={{
-            assistant: {
-              placement: 'start',
-              variant: 'borderless',
-              footer: (
-                <div style={{display: 'flex'}}>
-                  <Button type="text" size="small" icon={<ReloadOutlined/>}/>
-                  <Button type="text" size="small" icon={<CopyOutlined/>}/>
-                  <Button type="text" size="small" icon={<LikeOutlined/>}/>
-                  <Button type="text" size="small" icon={<DislikeOutlined/>}/>
-                </div>
-              ),
-            },
-            user: {placement: 'end', variant: 'borderless',},
-          }}
-        />
-      ) : (
-        <Space
-          direction="vertical"
-          size={16}
-          style={{paddingInline: 'calc(calc(100% - 900px) /2)'}}
-          className="placeholder"
-        >
-          <Welcome
-            variant="borderless"
-            icon="https://mdn.alipayobjects.com/huamei_iwk9zp/afts/img/A*s5sNRo5LjfQAAAAAAAAAAAAADgCCAQ/fmt.webp"
-            title="Hello, I'm Ant Design X"
-            description="Base on Ant Design, AGI product interface solution, create a better intelligent vision~"
-            extra={
-              <Space>
-                <Button icon={<ShareAltOutlined/>}/>
-                <Button icon={<EllipsisOutlined/>}/>
-              </Space>
-            }
-          />
-          <Flex gap={16} wrap="wrap">
-            <Prompts
-              items={[HOT_TOPICS]}
-              styles={{
-                list: {height: '100%'},
-                item: {
-                  flex: 1,
-                  minWidth: 300,
-                  backgroundImage: 'linear-gradient(123deg, #e5f4ff 0%, #efe7ff 100%)',
-                  borderRadius: 12,
-                  border: 'none',
-                },
-                subItem: {padding: 0, background: 'transparent'},
-              }}
-              onItemClick={(info) => {
-                onSubmit(info.data.description as string);
-              }}
-              className="chatPrompt"
-            />
-
-            <Prompts
-              items={[DESIGN_GUIDE]}
-              styles={{
-                item: {
-                  flex: 1,
-                  minWidth: 300,
-                  backgroundImage: 'linear-gradient(123deg, #e5f4ff 0%, #efe7ff 100%)',
-                  borderRadius: 12,
-                  border: 'none',
-                },
-                subItem: {background: '#ffffffa6'},
-              }}
-              onItemClick={(info) => {
-                onSubmit(info.data.description as string);
-              }}
-              className="chatPrompt"
-            />
-          </Flex>
-        </Space>
-      )}
-    </div>
-  );
-  const senderHeader = (
-    <Sender.Header
-      title="Upload File"
-      open={attachmentsOpen}
-      onOpenChange={setAttachmentsOpen}
-      styles={{content: {padding: 0}}}
-    >
-      <Attachments
-        beforeUpload={() => false}
-        items={attachedFiles}
-        onChange={(info) => setAttachedFiles(info.fileList)}
-        placeholder={(type) =>
-          type === 'drop'
-            ? {title: 'Drop file here'}
-            : {
-              icon: <CloudUploadOutlined/>,
-              title: 'Upload files',
-              description: 'Click or drag files to this area to upload',
-            }
-        }
-      />
-    </Sender.Header>
-  );
-  const chatSender = (
-    <>
-      {/* 🌟 提示词 */}
-      <Prompts
-        items={SENDER_PROMPTS}
-        onItemClick={(info) => {
-          onSubmit(info.data.description as string);
-        }}
-        styles={{
-          item: {padding: '6px 12px'},
-        }}
-        className="senderPrompt"
-      />
-      <div className="toolbar">
-        <Tooltip title="Select AI Model" placement="top">
-          <div className="selectWrapper">
-            <Select
-              value={model}
-              onChange={setModel}
-              options={MODEL_OPTIONS}
-              suffixIcon={<OpenAIOutlined/>}
-              styles={{ popup: { root: { minWidth: 180 } } }}
-            />
-          </div>
-        </Tooltip>
-
-        <Tooltip title="Select Tools" placement="top">
-          <div className="selectWrapper">
-            <Select
-              value={tools}
-              onChange={(vals) => setTools(vals as string[])}
-              options={TOOL_OPTIONS}
-              mode="multiple"
-              suffixIcon={<ProductOutlined/>}
-              styles={{ popup: { root: { minWidth: 180 } } }}
-            />
-          </div>
-        </Tooltip>
-
-        {tools.length > 0 && (
-          <Tag className="tag" icon={<PaperClipOutlined/>}>
-            {tools.length} tools enabled
-          </Tag>
-        )}
-      </div>
-      {/* 🌟 输入框 */}
-      <Sender
-        value={inputValue}
-        header={senderHeader}
-        onSubmit={() => {
-          onSubmit(inputValue);
-          setInputValue('');
-        }}
-        onChange={setInputValue}
-        onCancel={() => {
-          abortController.current?.abort();
-        }}
-        prefix={
-          <Button
-            type="text"
-            icon={<PaperClipOutlined style={{fontSize: 18}}/>}
-            onClick={() => setAttachmentsOpen(!attachmentsOpen)}
-          />
-        }
-        loading={loading}
-        className="sender"
-        allowSpeech
-        actions={(_, info) => {
-          const {SendButton, LoadingButton, SpeechButton} = info.components;
-          return (
-            <Flex gap={4}>
-              <SpeechButton className="speechButton"/>
-              {loading ? <LoadingButton type="default"/> : <SendButton type="primary"/>}
-            </Flex>
-          );
-        }}
-        placeholder="Ask or input / use skills"
-      />
-    </>
-  );
-
   useEffect(() => {
     // history mock
     if (messages?.length) {
@@ -430,8 +178,27 @@ const Chat: React.FC = () => {
       />
 
       <div className="chat">
-        {chatList}
-        {chatSender}
+        {/* 使用 ChatList 组件 */}
+        <ChatList
+          messages={messages}
+          onSubmit={onSubmit}
+        />
+
+        {/* 使用 ChatSender 组件 */}
+        <ChatSender
+          inputValue={inputValue}
+          setInputValue={setInputValue}
+          onSubmit={onSubmit}
+          model={model}
+          setModel={setModel}
+          tools={tools}
+          setTools={setTools}
+          loading={loading}
+          attachmentsOpen={attachmentsOpen}
+          setAttachmentsOpen={setAttachmentsOpen}
+          attachedFiles={attachedFiles}
+          setAttachedFiles={setAttachedFiles}
+        />
       </div>
     </div>
   );
