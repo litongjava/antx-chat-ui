@@ -8,6 +8,19 @@ export type BubbleDataType = {
   reasoning_content?: string | null;
 };
 
+export interface ChatSiderProps {
+  conversations: ConversationItem[];
+  curConversation: string;
+  onNewConversation: () => void;
+  onConversationChange: (key: string) => void;
+  onDeleteConversation: (key: string) => void;
+  onRenameConversation: (key: string) => void;
+  siderCollapsed: boolean;
+  mobileSiderVisible: boolean;
+  toggleSider: () => void;
+  toggleMobileSider: () => void;
+}
+
 export type ConversationItem = {
   key: string;
   label: string;

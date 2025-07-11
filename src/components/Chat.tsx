@@ -2,22 +2,18 @@
 import {
   CloudUploadOutlined,
   CopyOutlined,
-  DeleteOutlined,
   DislikeOutlined,
-  EditOutlined,
   EllipsisOutlined,
   LikeOutlined,
-  MenuFoldOutlined,
   MenuUnfoldOutlined,
   OpenAIOutlined,
   PaperClipOutlined,
   PlusOutlined,
   ProductOutlined,
-  QuestionCircleOutlined,
   ReloadOutlined,
   ShareAltOutlined,
 } from '@ant-design/icons';
-import {Attachments, Bubble, Conversations, Prompts, Sender, useXAgent, useXChat, Welcome} from '@ant-design/x';
+import {Attachments, Bubble, Prompts, Sender, useXAgent, useXChat, Welcome} from '@ant-design/x';
 import {Button, Collapse, Flex, message, Select, Space, Spin, Tag, Tooltip} from 'antd';
 import dayjs from 'dayjs';
 import React, {useEffect, useRef, useState} from 'react';
@@ -33,7 +29,7 @@ import {
   TOOL_OPTIONS
 } from './consts';
 import {MessageInfo} from "@ant-design/x/es/use-x-chat";
-import UserAvatar from './UserAvatar';
+import ChatSider from './ChatSider';
 
 const md = markdownit({html: true, breaks: true});
 
@@ -180,137 +176,7 @@ const Chat: React.FC = () => {
     setMobileSiderVisible(false);
   };
 
-  // ==================== Nodes ====================
-  const chatSider = (
-    <div
-      className={`sider ${siderCollapsed ? 'collapsed' : ''} ${mobileSiderVisible ? 'mobileVisible' : ''}`}
-    >
-      {siderCollapsed ? (
-        <div className="collapsedIconContainer">
-          {/* 折叠状态下的顶部Logo */}
-          <div className="collapsedLogo">
-            <img
-              src="https://mdn.alipayobjects.com/huamei_iwk9zp/afts/img/A*eco6RrQhxbMAAAAAAAAAAAAADgCCAQ/original"
-              draggable={false}
-              alt="logo"
-              width={32}
-              height={32}
-            />
-          </div>
 
-          {/* 折叠状态下的菜单按钮 */}
-          <Button
-            type="text"
-            className="collapsedMenuButton"
-            icon={<MenuUnfoldOutlined style={{fontSize: 20}}/>}
-            onClick={toggleSider}
-          />
-
-          {/* 新建会话按钮（折叠状态） */}
-          <div
-            className="collapsedIcon"
-            onClick={handleNewConversation}
-          >
-            <div className="newChatIcon">
-              <PlusOutlined/>
-            </div>
-          </div>
-
-          {/* 底部头像 */}
-          <div className="collapsedAvatar">
-            <UserAvatar />
-          </div>
-        </div>
-      ) : (
-        <>
-          {/* 🌟 Logo */}
-          <div className="logo">
-            <div className="logoContent">
-              <img
-                src="https://mdn.alipayobjects.com/huamei_iwk9zp/afts/img/A*eco6RrQhxbMAAAAAAAAAAAAADgCCAQ/original"
-                draggable={false}
-                alt="logo"
-                width={24}
-                height={24}
-              />
-              <span>Ant Design X</span>
-            </div>
-            <Button
-              type="text"
-              icon={siderCollapsed ? <MenuUnfoldOutlined/> : <MenuFoldOutlined/>}
-              onClick={toggleSider}
-            />
-          </div>
-
-          {/* 🌟 添加会话 */}
-          <Button
-            onClick={handleNewConversation}
-            type="link"
-            className="addBtn"
-            icon={<PlusOutlined style={{fontSize: 16}}/>}
-          >
-            New Conversation
-          </Button>
-
-          {/* 🌟 会话管理 */}
-          <Conversations
-            items={conversations}
-            className="conversations"
-            activeKey={curConversation}
-            onActiveChange={async (val) => {
-              abortController.current?.abort();
-              // The abort execution will trigger an asynchronous requestFallback, which may lead to timing issues.
-              // In future versions, the sessionId capability will be added to resolve this problem.
-              setTimeout(() => {
-                setCurConversation(val);
-                setMessages(messageHistory?.[val] || []);
-              }, 100);
-              setMobileSiderVisible(false);
-            }}
-            groupable
-            styles={{item: {padding: '0 8px'}}}
-            menu={(conversation) => ({
-              items: [
-                {
-                  label: 'Rename',
-                  key: 'rename',
-                  icon: <EditOutlined/>,
-                },
-                {
-                  label: 'Delete',
-                  key: 'delete',
-                  icon: <DeleteOutlined/>,
-                  danger: true,
-                  onClick: () => {
-                    const newList = conversations.filter((item) => item.key !== conversation.key);
-                    const newKey = newList?.[0]?.key;
-                    setConversations(newList);
-                    // The delete operation modifies curConversation and triggers onActiveChange, so it needs to be executed with a delay to ensure it overrides correctly at the end.
-                    // This feature will be fixed in a future version.
-                    setTimeout(() => {
-                      if (conversation.key === curConversation) {
-                        setCurConversation(newKey);
-                        setMessages(messageHistory?.[newKey] || []);
-                      }
-                    }, 200);
-                  },
-                },
-              ],
-            })}
-          />
-
-          <div className="siderFooter">
-            <UserAvatar />
-            <Button
-              type="text"
-              icon={<QuestionCircleOutlined/>}
-              className="questionBtn"
-            />
-          </div>
-        </>
-      )}
-    </div>
-  );
 
   const chatList = (
     <div className="chatList">
@@ -549,7 +415,19 @@ const Chat: React.FC = () => {
       )}
 
       {/* 侧边栏 */}
-      {chatSider}
+      <ChatSider
+        siderCollapsed={siderCollapsed}
+        toggleSider={toggleSider}
+        mobileSiderVisible={mobileSiderVisible}
+        setMobileSiderVisible={setMobileSiderVisible}
+        conversations={conversations}
+        curConversation={curConversation}
+        setCurConversation={setCurConversation}
+        setConversations={setConversations}
+        setMessages={setMessages}
+        messageHistory={messageHistory}
+        handleNewConversation={handleNewConversation}
+      />
 
       <div className="chat">
         {chatList}
