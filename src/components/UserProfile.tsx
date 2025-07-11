@@ -1,18 +1,20 @@
-import {useEffect, useState} from 'react';
-import {useNavigate} from 'react-router-dom';
-import {Avatar, Button, Card, Form, Input, message, Modal, Spin, Upload} from 'antd';
-import {LoadingOutlined, UserOutlined} from '@ant-design/icons';
-import {useUser} from '../context/UserContext';
-import {config} from '../config/config';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Avatar, Button, Card, Form, Input, message, Modal, Spin, Upload } from 'antd';
+import { LoadingOutlined, UserOutlined } from '@ant-design/icons';
+import { useUser } from '../context/UserContext';
+import { config } from '../config/config';
 import './UserProfile.css';
 
 const UserProfile = () => {
   const [form] = Form.useForm();
+  const [passwordForm] = Form.useForm();
   const [loading, setLoading] = useState(true);
   const [avatarLoading, setAvatarLoading] = useState(false);
   const [removeLoading, setRemoveLoading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const {user, setUser} = useUser();
+  const [passwordModalVisible, setPasswordModalVisible] = useState(false);
+  const { user, setUser } = useUser();
   const navigate = useNavigate();
 
   const showError = (error: unknown, defaultMsg: string) => {
@@ -57,22 +59,23 @@ const UserProfile = () => {
     };
 
     fetchUserProfile();
-  }, [form, navigate]);
+  }, [form, navigate, user]);
 
   const handleUpdateProfile = async (values: any) => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('app_token');
+      const token = user?.token;
       if (!token) throw new Error('未登录');
 
-      const response = await fetch(`${config.base_url}/api/v1/user/profile`, {
-        method: 'PUT',
+      // 修改为使用POST方法和正确的接口路径
+      const response = await fetch(`${config.base_url}/api/v1/user/update`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
-          displayName: values.displayName,
+          display_name: values.displayName,
           bio: values.bio || null,
         })
       });
@@ -80,6 +83,10 @@ const UserProfile = () => {
       const result = await response.json();
       if (result.ok) {
         message.success('更新成功');
+        // 更新用户上下文
+        if (user) {
+          setUser(user);
+        }
       } else {
         throw new Error(result.msg || '更新失败');
       }
@@ -90,21 +97,53 @@ const UserProfile = () => {
     }
   };
 
+  const handleUpdatePassword = async () => {
+    try {
+      const values = await passwordForm.validateFields();
+      const token = user?.token;
+      if (!token) throw new Error('未登录');
+
+      setLoading(true);
+      const response = await fetch(`${config.base_url}/api/v1/user/updatePassword`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          old_password: values.oldPassword,
+          new_password: values.newPassword
+        })
+      });
+
+      const result = await response.json();
+      if (result.ok) {
+        message.success('密码更新成功');
+        setPasswordModalVisible(false);
+        passwordForm.resetFields();
+      } else {
+        throw new Error(result.msg || '密码更新失败');
+      }
+    } catch (error) {
+      showError(error, '密码更新失败');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleLogout = async () => {
     try {
-      const token = localStorage.getItem('app_token');
-      if (token) {
+      if (user?.token) {
         // 调用登出接口
         await fetch(`${config.base_url}/api/v1/logout`, {
           method: 'GET',
           headers: {
-            Authorization: `Bearer ${token}`
+            Authorization: `Bearer ${user.token}`
           }
         });
       }
     } finally {
       localStorage.removeItem('app_user');
-      localStorage.removeItem('app_token');
       setUser(null);
       message.success('已退出登录');
       navigate('/login');
@@ -121,13 +160,12 @@ const UserProfile = () => {
       onOk: async () => {
         try {
           setRemoveLoading(true);
-          const token = localStorage.getItem('app_token');
-          if (!token) throw new Error('未登录');
+          if (!user?.token) throw new Error('未登录');
 
           const response = await fetch(`${config.base_url}/api/v1/user/remove`, {
             method: 'GET',
             headers: {
-              Authorization: `Bearer ${token}`
+              Authorization: `Bearer ${user.token}`
             }
           });
 
@@ -156,13 +194,12 @@ const UserProfile = () => {
       const formData = new FormData();
       formData.append('avatar', file);
 
-      const token = localStorage.getItem('app_token');
-      if (!token) throw new Error('未登录');
+      if (!user?.token) throw new Error('未登录');
 
-      const response = await fetch(`${config.base_url}/api/v1/user/avatar`, {
+      const response = await fetch(`${config.base_url}/api/v1/user/updateAvatar`, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${user.token}`
         },
         body: formData
       });
@@ -189,7 +226,7 @@ const UserProfile = () => {
   if (loading) {
     return (
       <div className="profile-spinner">
-        <Spin indicator={<LoadingOutlined style={{fontSize: 36}} spin/>}/>
+        <Spin indicator={<LoadingOutlined style={{ fontSize: 36 }} spin />} />
         <p>加载用户信息中...</p>
       </div>
     );
@@ -202,16 +239,16 @@ const UserProfile = () => {
           <Upload
             accept="image/*"
             showUploadList={false}
-            customRequest={({file}) => handleAvatarChange(file as File)}
+            customRequest={({ file }) => handleAvatarChange(file as File)}
           >
             {avatarLoading ? (
-              <Spin indicator={<LoadingOutlined style={{fontSize: 24}} spin/>}/>
+              <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />
             ) : (
               <Avatar
                 size={128}
                 src={avatarUrl}
-                icon={<UserOutlined/>}
-                style={{backgroundColor: '#1890ff'}}
+                icon={<UserOutlined />}
+                style={{ backgroundColor: '#1890ff' }}
               />
             )}
           </Upload>
@@ -227,23 +264,23 @@ const UserProfile = () => {
           <Form.Item
             label="用户名"
             name="displayName"
-            rules={[{required: true, message: '请输入用户名'}]}
+            rules={[{ required: true, message: '请输入用户名' }]}
           >
-            <Input size="large" placeholder="用户名"/>
+            <Input size="large" placeholder="用户名" />
           </Form.Item>
 
           <Form.Item
             label="邮箱"
             name="email"
           >
-            <Input size="large" placeholder="邮箱" disabled/>
+            <Input size="large" placeholder="邮箱" disabled />
           </Form.Item>
 
           <Form.Item
             label="个人简介"
             name="bio"
           >
-            <Input.TextArea placeholder="介绍一下你自己..." rows={4}/>
+            <Input.TextArea placeholder="介绍一下你自己..." rows={4} />
           </Form.Item>
 
           <Form.Item>
@@ -259,6 +296,13 @@ const UserProfile = () => {
           </Form.Item>
 
           <div className="action-buttons">
+            <Button
+              onClick={() => setPasswordModalVisible(true)}
+              className="change-password-btn"
+            >
+              修改密码
+            </Button>
+
             <Button
               onClick={handleLogout}
               className="logout-btn"
@@ -276,6 +320,63 @@ const UserProfile = () => {
           </div>
         </Form>
       </Card>
+
+      {/* 修改密码模态框 */}
+      <Modal
+        title="修改密码"
+        visible={passwordModalVisible}
+        onCancel={() => {
+          setPasswordModalVisible(false);
+          passwordForm.resetFields();
+        }}
+        onOk={handleUpdatePassword}
+        confirmLoading={loading}
+        okText="确认修改"
+        cancelText="取消"
+      >
+        <Form
+          form={passwordForm}
+          layout="vertical"
+        >
+          <Form.Item
+            label="原密码"
+            name="oldPassword"
+            rules={[{ required: true, message: '请输入原密码' }]}
+          >
+            <Input.Password size="large" placeholder="原密码" />
+          </Form.Item>
+
+          <Form.Item
+            label="新密码"
+            name="newPassword"
+            rules={[
+              { required: true, message: '请输入新密码' },
+              { min: 6, message: '密码长度至少6位' }
+            ]}
+          >
+            <Input.Password size="large" placeholder="新密码" />
+          </Form.Item>
+
+          <Form.Item
+            label="确认新密码"
+            name="confirmPassword"
+            dependencies={['newPassword']}
+            rules={[
+              { required: true, message: '请确认新密码' },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue('newPassword') === value) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error('两次输入的密码不一致'));
+                },
+              }),
+            ]}
+          >
+            <Input.Password size="large" placeholder="确认新密码" />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };

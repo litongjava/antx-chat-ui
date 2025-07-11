@@ -9,6 +9,7 @@ interface AppLoginUserData {
   //0 匿名 1 普通用户 2 高级用户
   type: number;
   display_name?: string;
+  bil?:string,
   email?: string;
   photo_url?: string;
 }
