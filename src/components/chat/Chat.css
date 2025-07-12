@@ -38,10 +38,13 @@
         width: 280px;
         padding: 0 12px;
         z-index: 100;
+        background: var(--ant-color-bg-container,#ffffff);
+        box-shadow: 4px 0 12px rgba(0, 0, 0, 0.1);
     }
 
     .sider.mobileVisible {
         transform: translateX(0);
+        background: var(--ant-color-bg-container,#ffffff);
     }
 }
 

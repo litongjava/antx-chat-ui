@@ -187,7 +187,7 @@ const Chat: React.FC = () => {
         mobileSiderVisible={mobileSiderVisible}
         setMobileSiderVisible={setMobileSiderVisible}
         conversations={conversations}
-        curConversation={curConversation || ''} // 传递空字符串替代undefined
+        curConversation={curConversation || ''}
         setCurConversation={setCurConversation}
         setConversations={setConversations}
         setMessages={setMessages}
