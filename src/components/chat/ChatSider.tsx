@@ -26,7 +26,7 @@ interface ChatSiderProps {
   mobileSiderVisible: boolean;
   setMobileSiderVisible: (visible: boolean) => void;
   conversations: ConversationItem[];
-  curConversation: string;
+  curConversation: string; // 这里保持为string
   setCurConversation: (key: string) => void;
   setConversations: (items: ConversationItem[]) => void;
   setMessages: (messages: MessageInfo<BubbleDataType>[]) => void;
@@ -51,7 +51,6 @@ const ChatSider: React.FC<ChatSiderProps> = ({
                                                onDelete
                                              }) => {
   const handleRename = (conversation: Conversation) => {
-    // 如果 label 本来就是 string 就用它，否则 fallback 为空串
     const defaultName =
       typeof conversation.label === 'string'
         ? conversation.label
@@ -131,14 +130,16 @@ const ChatSider: React.FC<ChatSiderProps> = ({
           <Conversations
             items={conversations}
             className="conversations"
-            activeKey={curConversation}
+            activeKey={curConversation} // 这里直接使用，空字符串是安全的
             onActiveChange={async (val) => {
-              // 模拟abort处理
-              setTimeout(() => {
-                setCurConversation(val);
-                setMessages(messageHistory?.[val] || []);
-              }, 100);
-              setMobileSiderVisible(false);
+              // 确保val是字符串
+              if (val) {
+                setTimeout(() => {
+                  setCurConversation(val);
+                  setMessages(messageHistory?.[val] || []);
+                }, 100);
+                setMobileSiderVisible(false);
+              }
             }}
             groupable
             styles={{item: {padding: '0 8px'}}}

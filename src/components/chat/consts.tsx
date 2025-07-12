@@ -12,13 +12,7 @@ import {
 import {GetProp} from "antd";
 import {Prompts} from "@ant-design/x";
 
-export const DEFAULT_CONVERSATIONS_ITEMS = [
-  {
-    key: 'default-0',
-    label: 'New Chat?',
-    group: 'Today',
-  },
-];
+export const DEFAULT_CONVERSATIONS_ITEMS = [];
 
 export const HOT_TOPICS = {
   key: '1',
@@ -115,4 +109,5 @@ export const TOOL_OPTIONS = [
   {label: 'Search', value: 'search'},
   {label: 'Linux', value: 'linux'},
   {label: 'Translate', value: 'translate'},
+  {label: 'Browser', value: 'browser'},
 ];

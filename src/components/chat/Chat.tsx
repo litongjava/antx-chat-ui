@@ -4,16 +4,14 @@ import {Button, message} from 'antd';
 import React, {useEffect, useState} from 'react';
 import './Chat.css';
 import {AttachmentFile, BubbleDataType, ConversationItem} from './types.ts';
-import {DEFAULT_CONVERSATIONS_ITEMS} from './consts.tsx';
 import {MessageInfo} from "@ant-design/x/es/use-x-chat";
 import ChatSider from './ChatSider.tsx';
-import ChatMessageList from './ChatMessageList.tsx'; // 新增
+import ChatMessageList from './ChatMessageList.tsx';
 import ChatSender from './ChatSender.tsx';
 import useChatService from "./useChatService.ts";
 import {useUser} from "../../context/UserContext.tsx";
 import {ChatService} from "../../services/ChatService.ts";
-import {showError} from "../../utils/ErrorUtils.ts"; // 新增
-
+import {showError} from "../../utils/ErrorUtils.ts";
 
 const Chat: React.FC = () => {
   const {
@@ -27,8 +25,9 @@ const Chat: React.FC = () => {
   // ==================== State ====================
   const [messageHistory, setMessageHistory] = useState<Record<string, MessageInfo<BubbleDataType>[]>>({});
 
-  const [conversations, setConversations] = useState<ConversationItem[]>(DEFAULT_CONVERSATIONS_ITEMS);
-  const [curConversation, setCurConversation] = useState<string>(DEFAULT_CONVERSATIONS_ITEMS[0].key);
+  // 修复1: 初始化conversations为空数组
+  const [conversations, setConversations] = useState<ConversationItem[]>([]);
+  const [curConversation, setCurConversation] = useState<string|null>(null);
 
   const [attachmentsOpen, setAttachmentsOpen] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<AttachmentFile[]>([]);
@@ -40,8 +39,8 @@ const Chat: React.FC = () => {
   const [siderCollapsed, setSiderCollapsed] = useState(false);
   const [mobileSiderVisible, setMobileSiderVisible] = useState(false);
 
-  const {user} = useUser(); // 获取用户信息
-  const token = user?.token; // 获取用户token
+  const {user} = useUser();
+  const token = user?.token;
 
   // ==================== Event ====================
   const onSubmit = (val: string) => {
@@ -66,16 +65,14 @@ const Chat: React.FC = () => {
     setMobileSiderVisible(!mobileSiderVisible);
   };
 
-
   useEffect(() => {
-    // history mock
-    if (messages?.length) {
+    if (messages?.length && curConversation) {
       setMessageHistory((prev) => ({
         ...prev,
         [curConversation]: messages,
       }));
     }
-  }, [messages]);
+  }, [messages, curConversation]);
 
   // 加载会话列表
   useEffect(() => {
@@ -87,13 +84,12 @@ const Chat: React.FC = () => {
 
       try {
         const sessions = await ChatService.listSessions(token);
-        if (sessions.length > 0) {
-          setConversations(sessions);
-          setCurConversation(sessions[0].key);
+        setConversations(sessions);
+
+        if (sessions.length === 0) {
+          await handleNewConversation();
         } else {
-          // 如果没有会话，使用默认会话
-          setConversations(DEFAULT_CONVERSATIONS_ITEMS);
-          setCurConversation(DEFAULT_CONVERSATIONS_ITEMS[0].key);
+          setCurConversation(sessions[0].key);
         }
       } catch (error) {
         showError(error, '加载会话失败');
@@ -123,6 +119,7 @@ const Chat: React.FC = () => {
       setCurConversation(newSession.key);
       setMessages([]);
       setMobileSiderVisible(false);
+      return newSession; // 返回新创建的会话
     }
   };
 
@@ -166,11 +163,8 @@ const Chat: React.FC = () => {
     }
   };
 
-
-  // ==================== Render =================
   return (
     <div className="layout">
-      {/* 移动端头部 */}
       <div className="mobileHeader">
         <Button
           icon={<MenuUnfoldOutlined/>}
@@ -183,19 +177,17 @@ const Chat: React.FC = () => {
         />
       </div>
 
-      {/* 移动端侧边栏遮罩 */}
       {mobileSiderVisible && (
         <div className="overlay" onClick={() => setMobileSiderVisible(false)}/>
       )}
 
-      {/* 侧边栏 */}
       <ChatSider
         siderCollapsed={siderCollapsed}
         toggleSider={toggleSider}
         mobileSiderVisible={mobileSiderVisible}
         setMobileSiderVisible={setMobileSiderVisible}
         conversations={conversations}
-        curConversation={curConversation}
+        curConversation={curConversation || ''} // 传递空字符串替代undefined
         setCurConversation={setCurConversation}
         setConversations={setConversations}
         setMessages={setMessages}
@@ -205,15 +197,12 @@ const Chat: React.FC = () => {
         onDelete={handleDeleteSession}
       />
 
-
       <div className="chat">
-        {/* 使用 ChatMessageList 组件 */}
         <ChatMessageList
           messages={messages}
           onSubmit={onSubmit}
         />
 
-        {/* 使用 ChatSender 组件 */}
         <ChatSender
           inputValue={inputValue}
           setInputValue={setInputValue}
