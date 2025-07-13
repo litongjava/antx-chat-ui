@@ -100,9 +100,13 @@ export const SENDER_PROMPTS: GetProp<typeof Prompts, 'items'> = [ // 添加类�
   },
 ];
 
+export const PROVIDER_OPTIONS = [
+  {label: 'Volc Engine', value: 'volcengine'},
+];
+
 export const MODEL_OPTIONS = [
+  {label: 'DeepSeek v3', value: 'deepseek-v3'},
   {label: 'DeepSeek (R1)', value: 'deepseek-r1'},
-  {label: 'DeepSeek-R1-Distill-Qwen-7B', value: 'DeepSeek-R1-Distill-Qwen-7B'},
 ];
 
 export const TOOL_OPTIONS = [

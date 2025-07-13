@@ -2,14 +2,16 @@
 import React from 'react';
 import {Attachments, Prompts, Sender} from '@ant-design/x';
 import {Button, Flex, Select, Tag, Tooltip} from 'antd';
-import {CloudUploadOutlined, OpenAIOutlined, PaperClipOutlined, ProductOutlined,} from '@ant-design/icons';
-import {MODEL_OPTIONS, SENDER_PROMPTS, TOOL_OPTIONS} from './consts.tsx';
+import {CloudUploadOutlined, PaperClipOutlined,} from '@ant-design/icons';
+import {MODEL_OPTIONS, PROVIDER_OPTIONS, SENDER_PROMPTS, TOOL_OPTIONS} from './consts.tsx';
 import {AttachmentFile} from './types.ts';
 
 interface ChatSenderProps {
   inputValue: string;
   setInputValue: (value: string) => void;
   onSubmit: (val: string) => void;
+  provider: string;
+  setProvider: (model: string) => void;
   model: string;
   setModel: (model: string) => void;
   tools: string[];
@@ -27,6 +29,8 @@ const ChatSender: React.FC<ChatSenderProps> = ({
                                                  onSubmit,
                                                  model,
                                                  setModel,
+                                                 provider,
+                                                 setProvider,
                                                  tools,
                                                  setTools,
                                                  loading,
@@ -73,29 +77,33 @@ const ChatSender: React.FC<ChatSenderProps> = ({
         className="senderPrompt"
       />
       <div className="toolbar">
+        <Tooltip title="Select Provider" placement="top">
+          <Select
+            value={provider}
+            onChange={setProvider}
+            options={PROVIDER_OPTIONS}
+            styles={{popup: {root: {minWidth: 180}}}}
+          />
+        </Tooltip>
+
         <Tooltip title="Select AI Model" placement="top">
-          <div className="selectWrapper">
-            <Select
-              value={model}
-              onChange={setModel}
-              options={MODEL_OPTIONS}
-              suffixIcon={<OpenAIOutlined/>}
-              styles={{popup: {root: {minWidth: 180}}}}
-            />
-          </div>
+          <Select
+            value={model}
+            onChange={setModel}
+            options={MODEL_OPTIONS}
+            styles={{popup: {root: {minWidth: 180}}}}
+          />
+
         </Tooltip>
 
         <Tooltip title="Select Tools" placement="top">
-          <div className="selectWrapper">
-            <Select
-              value={tools}
-              onChange={(vals) => setTools(vals as string[])}
-              options={TOOL_OPTIONS}
-              mode="multiple"
-              suffixIcon={<ProductOutlined/>}
-              styles={{popup: {root: {minWidth: 180}}}}
-            />
-          </div>
+          <Select
+            value={tools}
+            onChange={(vals) => setTools(vals as string[])}
+            options={TOOL_OPTIONS}
+            mode="multiple"
+            styles={{root: {minWidth: 180}}}
+          />
         </Tooltip>
 
         {tools.length > 0 && (

@@ -8,10 +8,11 @@ import {MessageInfo} from "@ant-design/x/es/use-x-chat";
 import ChatSider from './ChatSider.tsx';
 import ChatMessageList from './ChatMessageList.tsx';
 import ChatSender from './ChatSender.tsx';
-import useChatService from "./useChatService.ts";
 import {useUser} from "../../context/UserContext.tsx";
 import {ChatService} from "../../services/ChatService.ts";
 import {showError} from "../../utils/ErrorUtils.ts";
+import useAgentService from "./useAgentService.ts";
+import {SSERequestParam} from "../../client/sseClient.ts";
 
 const Chat: React.FC = () => {
   const {
@@ -19,22 +20,23 @@ const Chat: React.FC = () => {
     setMessages,
     loading,
     sendMessage,
-    agent,
-  } = useChatService();
+    agent
+  } = useAgentService();
 
   // ==================== State ====================
   const [messageHistory, setMessageHistory] = useState<Record<string, MessageInfo<BubbleDataType>[]>>({});
 
   // 修复1: 初始化conversations为空数组
   const [conversations, setConversations] = useState<ConversationItem[]>([]);
-  const [curConversation, setCurConversation] = useState<string|null>(null);
+  const [curConversation, setCurConversation] = useState<string | null>(null);
 
   const [attachmentsOpen, setAttachmentsOpen] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<AttachmentFile[]>([]);
 
   const [inputValue, setInputValue] = useState('');
 
-  const [model, setModel] = useState<string>('DeepSeek-R1-Distill-Qwen-7B');
+  const [provider, setProvider] = useState<string>('volcengine');
+  const [model, setModel] = useState<string>('deepseek-v3');
   const [tools, setTools] = useState<string[]>([]);
   const [siderCollapsed, setSiderCollapsed] = useState(false);
   const [mobileSiderVisible, setMobileSiderVisible] = useState(false);
@@ -51,7 +53,13 @@ const Chat: React.FC = () => {
       return;
     }
 
-    const success = sendMessage(val, model, tools);
+    const requestParam: SSERequestParam = {
+      session_id: curConversation,
+      provider: provider,
+      model: model,
+      tools: tools,
+    }
+    const success = sendMessage(requestParam, {role: "user", content: val});
     if (!success) {
       message.error('Failed to send message');
     }
@@ -207,6 +215,8 @@ const Chat: React.FC = () => {
           inputValue={inputValue}
           setInputValue={setInputValue}
           onSubmit={onSubmit}
+          provider={provider}
+          setProvider={setProvider}
           model={model}
           setModel={setModel}
           tools={tools}

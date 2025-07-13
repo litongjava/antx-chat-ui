@@ -1,12 +1,16 @@
 // types.ts
-import type { GetProp } from 'antd';
+import type {GetProp} from 'antd';
 import {Attachments} from "@ant-design/x";
 
-export type BubbleDataType = {
-  role: string;
-  content: string;
-  reasoning_content?: string | null;
-};
+export interface BubbleDataType {
+  content: string;             // 消息内容
+  reasoning_content?: string;  // 推理内容
+  role: 'user' | 'assistant';  // 角色
+  model?: string;              // 模型名称
+  citations?: string[];        // 引用来源
+  question_id?: string;        // 问题ID
+  answer_id?: string;          // 回答ID
+}
 
 export interface ChatSiderProps {
   conversations: ConversationItem[];

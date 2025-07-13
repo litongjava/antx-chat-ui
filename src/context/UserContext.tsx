@@ -12,6 +12,7 @@ interface AppLoginUserData {
   bil?:string,
   email?: string;
   photo_url?: string;
+  school_id?: string;
 }
 
 interface UserContextType {
