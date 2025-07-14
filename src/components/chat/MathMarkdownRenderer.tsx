@@ -1,11 +1,15 @@
-import React, { useMemo } from 'react';
+import React, {useMemo} from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { materialDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter';
+import {materialDark} from 'react-syntax-highlighter/dist/esm/styles/prism';
 import 'katex/dist/katex.min.css';
+import rehypeRaw from "rehype-raw";
+import rehypeSanitize from "rehype-sanitize";
+import CopyButton from "../CopyButton.tsx";
+import {Terminal} from "lucide-react";
 
 interface MathMarkdownRendererProps {
   /** The markdown content to render, possibly containing LaTeX expressions */
@@ -17,7 +21,7 @@ interface MathMarkdownRendererProps {
 /**
  * A reusable Markdown renderer with support for tables, syntax highlighting, and LaTeX.
  */
-const MathMarkdownRenderer: React.FC<MathMarkdownRendererProps> = ({ content, className }) => {
+const MathMarkdownRenderer: React.FC<MathMarkdownRendererProps> = ({content, className}) => {
   const processedContent = useMemo(() => {
     if (!content) return content;
 
@@ -45,33 +49,45 @@ const MathMarkdownRenderer: React.FC<MathMarkdownRendererProps> = ({ content, cl
         remarkPlugins={[remarkMath, remarkGfm]}
         rehypePlugins={[rehypeKatex]}
         components={{
-          code({ node, inline, className: langClass, children, ...props }) {
+          code({node, inline, className: langClass, children, ...props}) {
             const match = /language-(\w+)/.exec(langClass || '');
             if (inline || !match) {
               return <code className={langClass} {...props}>{children}</code>;
             }
+            const id = Math.random().toString(36).substr(2, 9);
             return (
-              <SyntaxHighlighter
-                style={materialDark}
-                language={match[1]}
-                PreTag="div"
-                {...props}
-              >
-                {String(children).replace(/\n$/, '')}
-              </SyntaxHighlighter>
+              <div>
+                <div>
+                  <Terminal size={18}/>
+                  {match[1]}
+                  <CopyButton id={id}/>
+                </div>
+
+
+                <SyntaxHighlighter
+                  id={id}
+                  style={materialDark}
+                  language={match[1]}
+                  PreTag="div"
+                  {...props}
+                >
+                  {String(children).replace(/\n$/, '')}
+
+                </SyntaxHighlighter>
+              </div>
             );
           },
-          table({ children }) {
+          table({children}) {
             return (
               <div className="table-container">
                 <table className="markdown-table">{children}</table>
               </div>
             );
           },
-          th({ children }) {
+          th({children}) {
             return <th className="table-header">{children}</th>;
           },
-          td({ children }) {
+          td({children}) {
             return <td className="table-cell">{children}</td>;
           }
         }}
