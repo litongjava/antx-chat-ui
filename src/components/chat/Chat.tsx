@@ -1,5 +1,5 @@
 // Chat.tsx
-import {MenuUnfoldOutlined, PlusOutlined,} from '@ant-design/icons';
+import {CloseOutlined, MenuUnfoldOutlined, PlusOutlined,} from '@ant-design/icons';
 import {Button, message} from 'antd';
 import React, {useEffect, useState} from 'react';
 import './Chat.css';
@@ -40,6 +40,8 @@ const Chat: React.FC = () => {
   const [tools, setTools] = useState<string[]>([]);
   const [siderCollapsed, setSiderCollapsed] = useState(false);
   const [mobileSiderVisible, setMobileSiderVisible] = useState(false);
+  const [previewHtml, setPreviewHtml] = useState<string | null>(null);
+  const [previewVisible, setPreviewVisible] = useState(false);
 
   const {user} = useUser();
   const token = user?.token;
@@ -236,10 +238,15 @@ const Chat: React.FC = () => {
         loadHistory={loadHistory}
       />
 
+
       <div className="chat">
         <ChatMessageList
           messages={messages}
           onSubmit={onSubmit}
+          previewHtml={previewHtml}
+          setPreviewHtml={setPreviewHtml}
+          previewVisible={previewVisible}
+          setPreviewVisible={setPreviewVisible}
         />
 
         <ChatSender
@@ -259,6 +266,26 @@ const Chat: React.FC = () => {
           setAttachedFiles={setAttachedFiles}
         />
       </div>
+      {previewVisible && (
+        <div className="right-panel">
+          <div className="preview-header" style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '8px 16px',
+            borderBottom: '1px solid #eee',
+            background: '#fafafa'
+          }}>
+            <span style={{fontSize: 16, fontWeight: 500}}>Preview</span>
+            <Button type="text" icon={<CloseOutlined/>} onClick={() => setPreviewVisible(false)}/>
+          </div>
+          <iframe
+            srcDoc={previewHtml || ''}
+            style={{width: '100%', height: 'calc(100vh - 50px)', border: 0}}
+            sandbox="allow-scripts allow-same-origin"
+          />
+        </div>
+      )}
     </div>
   );
 };
