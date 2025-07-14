@@ -6,7 +6,6 @@ import remarkGfm from 'remark-gfm';
 import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter';
 import 'katex/dist/katex.min.css';
 import CodeBlokTools from "../CodeBlokTools.tsx";
-import {Terminal} from "lucide-react";
 import './CodeBlock.css';
 
 interface MathMarkdownRendererProps {
