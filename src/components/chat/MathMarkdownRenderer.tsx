@@ -13,9 +13,10 @@ interface MathMarkdownRendererProps {
   content: string;
   /** Optional additional className for the wrapper div */
   className?: string;
+  onRunCode?: (code: string, language: string) => void;
 }
 
-const MathMarkdownRenderer: React.FC<MathMarkdownRendererProps> = ({content, className}) => {
+const MathMarkdownRenderer: React.FC<MathMarkdownRendererProps> = ({content, className, onRunCode}) => {
   const processedContent = useMemo(() => {
     if (!content) return content;
 
@@ -55,7 +56,10 @@ const MathMarkdownRenderer: React.FC<MathMarkdownRendererProps> = ({content, cla
                   <div className="lang-info">
                     <span>{match[1]}</span>
                   </div>
-                  <CodeBlokTools id={id} language={match[1]}/>
+                  <CodeBlokTools id={id} language={match[1]} onRun={(code, lang) => {
+                    // 这里把 code 和 lang 交给上层去处理
+                    onRunCode?.(code, lang);
+                  }}/>
                 </div>
                 <SyntaxHighlighter
                   id={id}

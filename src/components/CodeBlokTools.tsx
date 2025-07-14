@@ -1,7 +1,13 @@
 import {Check, CirclePlay, Copy} from "lucide-react";
 import {useState} from "react";
 
-const CodeBlokTools = ({id, language}: { id: string, language: string }) => {
+interface Props {
+  id: string;
+  language: string;
+  onRun?: (code: string, language: string) => void;
+}
+
+const CodeBlokTools = ({id, language, onRun}: Props) => {
   // 修正状态变量和 setter 的命名
   const [copied, setCopied] = useState(false);
   const [runed, setRuned] = useState(false);
@@ -20,10 +26,10 @@ const CodeBlokTools = ({id, language}: { id: string, language: string }) => {
     }
   };
 
-  const onRun = async () => {
+  const onRunClick = async () => {
     try {
       const text = document.getElementById(id)!.innerText;
-      console.log(language, text)
+      if (onRun) onRun(text, language);
       setRuned(true);
       // 1 秒后恢复
       setTimeout(() => {
@@ -44,7 +50,7 @@ const CodeBlokTools = ({id, language}: { id: string, language: string }) => {
         <span>Copy</span>
       </button>
 
-      <button onClick={onRun}>
+      <button onClick={onRunClick}>
         {runed
           ? <Check size={16}/>
           : <CirclePlay size={16}/>
