@@ -1,5 +1,5 @@
 // ChatMessageList.tsx
-import React from 'react';
+import React, {useCallback, useState} from 'react';
 import {Prompts, Welcome} from '@ant-design/x';
 import {Button, Collapse, Flex, Space, Spin} from 'antd';
 import {Bubble} from '@ant-design/x/es';
@@ -39,27 +39,49 @@ export const renderMarkdown = (content: string, reasoning?: string | null) => (
     <div dangerouslySetInnerHTML={{__html: md.render(content)}}/>
   </div>
 );
+
 const ChatMessageList: React.FC<ChatListProps> = ({messages, onSubmit}) => {
+  const [showToast, setShowToast] = useState(false);
+  const [toastType, setToastType] = useState<'success' | 'error'>('success');
+
+  const handleCopy = useCallback((text: string) => {
+    navigator.clipboard.writeText(text)
+      .then(() => {
+        setToastType('success');
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 2000);
+      })
+      .catch(() => {
+        setToastType('error');
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
+      });
+  }, []);
+
   return (
     <div className="chatList">
       {messages?.length ? (
         /* 🌟 消息列表 */
         <Bubble.List
-          items={messages?.map((i) => {
+          items={messages?.map((i, index) => {
             const {message, status} = i;
             if (message?.role === 'user') {
               return {
                 ...i.message,
-                className: status === 'loading' ? 'loadingMessage' : '',
+                className: `${status === 'loading' ? 'loadingMessage ' : ''}user-message`,
                 messageRender: renderMarkdown,
+                // 添加索引属性
+                _index: index
               };
             } else {
               return {
                 ...i.message,
-                className: status === 'loading' ? 'loadingMessage' : '',
+                className: `${status === 'loading' ? 'loadingMessage ' : ''}assistant-message`,
                 messageRender: (content: string) =>
                   renderMarkdown(content, i.message.reasoning_content ?? null),
                 typing: status === 'loading' ? {step: 5, interval: 20, suffix: <Spin size="small"/>} : false,
+                // 添加索引属性
+                _index: index
               };
             }
           })}
@@ -68,16 +90,46 @@ const ChatMessageList: React.FC<ChatListProps> = ({messages, onSubmit}) => {
             assistant: {
               placement: 'start',
               variant: 'borderless',
-              footer: (
+              footer: (item: any) => (
                 <div style={{display: 'flex'}}>
                   <Button type="text" size="small" icon={<ReloadOutlined/>}/>
-                  <Button type="text" size="small" icon={<CopyOutlined/>}/>
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={<CopyOutlined/>}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (item) handleCopy(item);
+                    }}
+                  />
                   <Button type="text" size="small" icon={<LikeOutlined/>}/>
                   <Button type="text" size="small" icon={<DislikeOutlined/>}/>
                 </div>
               ),
             },
-            user: {placement: 'end', variant: 'borderless'},
+            user: {
+              placement: 'end',
+              variant: 'filled',
+              footer: (item: any) => (
+                <div
+                  style={{
+                    display: 'flex',
+                    position: 'relative',
+                    top: '-8px',
+                  }}
+                >
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={<CopyOutlined/>}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (item) handleCopy(item);
+                    }}
+                  />
+                </div>
+              ),
+            },
           }}
         />
       ) : (
@@ -138,6 +190,21 @@ const ChatMessageList: React.FC<ChatListProps> = ({messages, onSubmit}) => {
             />
           </Flex>
         </Space>
+      )}
+      {showToast && (
+        <div style={{
+          position: 'fixed',
+          top: '20px',
+          right: '20px',
+          padding: '10px 20px',
+          background: toastType === 'success' ? '#52c41a' : '#f5222d',
+          color: 'white',
+          borderRadius: '4px',
+          zIndex: 9999,
+          animation: 'fadeIn 0.3s'
+        }}>
+          {toastType === 'success' ? '✅ 已复制到剪贴板' : '❌ 复制失败'}
+        </div>
       )}
     </div>
   );

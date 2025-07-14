@@ -1,8 +1,8 @@
 // src/services/ChatService.ts
-import {config} from "../config/config.ts";
-import {showError} from "../utils/ErrorUtils.ts";
+import {config} from "../../config/config.ts";
+import {showError} from "../../utils/ErrorUtils.ts";
 import {MessageInfo} from "@ant-design/x/es/use-x-chat";
-import {BubbleDataType} from "../components/chat/types.ts";
+import {BubbleDataType} from "./types.ts";
 
 
 // 会话项类型
@@ -153,16 +153,12 @@ export class ChatService {
       if (result.ok && Array.isArray(result.data)) {
         return result.data.map((msg: any) => ({
           message: {
+            id: msg.id,
             role: msg.role,
             content: msg.content,
             model: msg.model || undefined,
             citations: msg.citations || undefined,
             reasoning_content: msg.reasoning_content || undefined,
-            // 根据角色设置不同的ID
-            ...(msg.role === 'user'
-                ? {question_id: msg.id}
-                : {answer_id: msg.id}
-            )
           },
           status: 'done' // 历史记录都是已完成的
         }));

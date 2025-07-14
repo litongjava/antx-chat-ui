@@ -9,7 +9,7 @@ import ChatSider from './ChatSider.tsx';
 import ChatMessageList from './ChatMessageList.tsx';
 import ChatSender from './ChatSender.tsx';
 import {useUser} from "../../context/UserContext.tsx";
-import {ChatService} from "../../services/ChatService.ts";
+import {ChatService} from "./ChatService.ts";
 import {showError} from "../../utils/ErrorUtils.ts";
 import useAgentService from "./useAgentService.ts";
 import {SSERequestParam} from "../../client/sseClient.ts";

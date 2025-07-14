@@ -3,6 +3,7 @@ import type {GetProp} from 'antd';
 import {Attachments} from "@ant-design/x";
 
 export interface BubbleDataType {
+  id?: string;
   content: string;             // 消息内容
   reasoning_content?: string;  // 推理内容
   role: 'user' | 'assistant';  // 角色
