@@ -8,37 +8,33 @@ import {BubbleDataType} from './types.ts';
 import {DESIGN_GUIDE, HOT_TOPICS} from './consts.tsx';
 import ReloadOutlined from '@ant-design/icons/lib/icons/ReloadOutlined';
 import {CopyOutlined, DislikeOutlined, EllipsisOutlined, LikeOutlined, ShareAltOutlined} from "@ant-design/icons";
-import markdownit from "markdown-it";
+import 'katex/dist/katex.min.css';
+import MathMarkdownRenderer from "./MathMarkdownRenderer.tsx";
+
+const renderMarkdown = (raw: string, reasoning?: string | null) => (
+  <div className="markdown-content">
+    {reasoning && (
+      <Collapse
+        defaultActiveKey={['1']}
+        style={{marginBottom: 12}}
+        items={[{
+          key: '1',
+          label: 'Thought',
+          children: (
+            <MathMarkdownRenderer content={reasoning}/>
+          )
+        }]}
+      />
+    )}
+    <MathMarkdownRenderer content={raw}/>
+  </div>
+);
 
 interface ChatListProps {
   messages: MessageInfo<BubbleDataType>[];
   onSubmit: (val: string) => void;
 }
 
-const md = markdownit({html: true, breaks: true});
-
-export const renderMarkdown = (content: string, reasoning?: string | null) => (
-  <div className="markdown-content">
-    {reasoning && (
-      <Collapse
-        defaultActiveKey={['1']}
-        style={{marginTop: 12}}
-        items={[
-          {
-            key: '1',
-            label: 'Thought',
-            children: (
-              <div
-                dangerouslySetInnerHTML={{__html: md.render(reasoning)}}
-              />
-            ),
-          },
-        ]}
-      />
-    )}
-    <div dangerouslySetInnerHTML={{__html: md.render(content)}}/>
-  </div>
-);
 
 const ChatMessageList: React.FC<ChatListProps> = ({messages, onSubmit}) => {
   const [showToast, setShowToast] = useState(false);
