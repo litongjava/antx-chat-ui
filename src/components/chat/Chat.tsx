@@ -73,14 +73,18 @@ const Chat: React.FC = () => {
     setMobileSiderVisible(!mobileSiderVisible);
   };
 
+  // 当切换会话时加载历史记录
   useEffect(() => {
-    if (messages?.length && curConversation) {
-      setMessageHistory((prev) => ({
-        ...prev,
-        [curConversation]: messages,
-      }));
+    if (curConversation && token) {
+      // 如果缓存中有记录，直接使用
+      if (messageHistory[curConversation]) {
+        setMessages(messageHistory[curConversation]);
+      } else {
+        // 否则从服务器加载
+        loadHistory(curConversation);
+      }
     }
-  }, [messages, curConversation]);
+  }, [curConversation, token]);
 
   // 加载会话列表
   useEffect(() => {
@@ -107,6 +111,7 @@ const Chat: React.FC = () => {
     loadConversations();
   }, [token]);
 
+
   // 创建新会话
   const handleNewConversation = async () => {
     if (agent.isRequesting()) {
@@ -125,6 +130,12 @@ const Chat: React.FC = () => {
     if (newSession) {
       setConversations(prev => [newSession, ...prev]);
       setCurConversation(newSession.key);
+      // 新会话初始化空历史记录
+      setMessageHistory(prev => ({
+        ...prev,
+        [newSession.key]: []
+      }));
+
       setMessages([]);
       setMobileSiderVisible(false);
       return newSession; // 返回新创建的会话
@@ -171,6 +182,25 @@ const Chat: React.FC = () => {
     }
   };
 
+  const loadHistory = async (sessionId: string) => {
+    if (!token) return;
+
+    try {
+      const history = await ChatService.getHistory(token, sessionId);
+
+      // 更新历史记录缓存
+      setMessageHistory(prev => ({
+        ...prev,
+        [sessionId]: history
+      }));
+
+      // 设置当前会话的消息
+      setMessages(history);
+    } catch (error) {
+      showError(error, '加载历史记录失败');
+    }
+  };
+
   return (
     <div className="layout">
       <div className="mobileHeader">
@@ -203,6 +233,7 @@ const Chat: React.FC = () => {
         handleNewConversation={handleNewConversation}
         onRename={handleRenameSession}
         onDelete={handleDeleteSession}
+        loadHistory={loadHistory}
       />
 
       <div className="chat">

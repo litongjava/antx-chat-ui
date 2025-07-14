@@ -1,6 +1,8 @@
 // src/services/ChatService.ts
 import {config} from "../config/config.ts";
 import {showError} from "../utils/ErrorUtils.ts";
+import {MessageInfo} from "@ant-design/x/es/use-x-chat";
+import {BubbleDataType} from "../components/chat/types.ts";
 
 
 // 会话项类型
@@ -125,6 +127,51 @@ export class ChatService {
     } catch (error) {
       showError(error, '删除会话失败')
       return false;
+    }
+  }
+
+  static async getHistory(
+    token: string,
+    session_id: string,
+    offset: number = 1,
+    limit: number = 1000
+  ): Promise<MessageInfo<BubbleDataType>[]> {
+    try {
+      const url = new URL(`${config.base_url}/api/v1/chat/history`);
+      url.searchParams.append('session_id', session_id);
+      url.searchParams.append('offset', offset.toString());
+      url.searchParams.append('limit', limit.toString());
+
+      const response = await fetch(url.toString(), {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      const result = await response.json();
+
+      if (result.ok && Array.isArray(result.data)) {
+        return result.data.map((msg: any) => ({
+          message: {
+            role: msg.role,
+            content: msg.content,
+            model: msg.model || undefined,
+            citations: msg.citations || undefined,
+            reasoning_content: msg.reasoning_content || undefined,
+            // 根据角色设置不同的ID
+            ...(msg.role === 'user'
+                ? {question_id: msg.id}
+                : {answer_id: msg.id}
+            )
+          },
+          status: 'done' // 历史记录都是已完成的
+        }));
+      } else {
+        throw new Error(result.msg || '获取历史记录失败');
+      }
+    } catch (error) {
+      showError(error, '获取历史记录失败');
+      return [];
     }
   }
 }

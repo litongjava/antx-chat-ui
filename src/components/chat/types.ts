@@ -8,21 +8,8 @@ export interface BubbleDataType {
   role: 'user' | 'assistant';  // 角色
   model?: string;              // 模型名称
   citations?: string[];        // 引用来源
-  question_id?: string;        // 问题ID
-  answer_id?: string;          // 回答ID
-}
-
-export interface ChatSiderProps {
-  conversations: ConversationItem[];
-  curConversation: string;
-  onNewConversation: () => void;
-  onConversationChange: (key: string) => void;
-  onDeleteConversation: (key: string) => void;
-  onRenameConversation: (key: string) => void;
-  siderCollapsed: boolean;
-  mobileSiderVisible: boolean;
-  toggleSider: () => void;
-  toggleMobileSider: () => void;
+  question_id?: string;        // 问题ID（用户消息）
+  answer_id?: string;          // 回答ID（助手消息）
 }
 
 export type ConversationItem = {

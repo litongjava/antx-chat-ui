@@ -17,7 +17,6 @@ export default function useAgentService() {
     Partial<BubbleDataType> // SSE 更新字段类型
   >({
     request: async (reqVo, {onSuccess, onUpdate, onError}) => {
-      debugger
       if (!user?.token) {
         showError(null, 'User not authenticated');
         return;

@@ -1,5 +1,5 @@
 // ChatSider.tsx
-import React from 'react';
+import React, {useEffect} from 'react';
 import {
   DeleteOutlined,
   EditOutlined,
@@ -34,6 +34,7 @@ interface ChatSiderProps {
   handleNewConversation: () => void;
   onRename: (sessionId: string, newName: string) => void;
   onDelete: (sessionId: string) => void;
+  loadHistory: (sessionId: string) => void;
 }
 
 const ChatSider: React.FC<ChatSiderProps> = ({
@@ -48,8 +49,15 @@ const ChatSider: React.FC<ChatSiderProps> = ({
                                                messageHistory,
                                                handleNewConversation,
                                                onRename,
-                                               onDelete
+                                               onDelete,
+                                               loadHistory
                                              }) => {
+  useEffect(() => {
+    if (curConversation) {
+      loadHistory(curConversation);
+    }
+  }, [curConversation]);
+
   const handleRename = (conversation: Conversation) => {
     const defaultName =
       typeof conversation.label === 'string'
