@@ -1,0 +1,50 @@
+/* 整个代码块容器，包含头部和主体 */
+.code-block {
+    border: 1px solid #444;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    margin: 1rem 0;
+}
+
+/* 头部：语言标识 + copy 按钮 */
+.code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #e5e5e5;
+    padding: 0.5rem 1rem;
+    font-family: monospace;
+    font-size: 0.875rem;
+}
+
+/* 语言名左侧小图标 + 文本 */
+.code-header .lang-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Copy 按钮 */
+.copy-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    background: transparent;
+    border: none;
+    color: #ccc;
+    cursor: pointer;
+    transition: color 0.2s, background 0.2s;
+    border-radius: 0.25rem;
+}
+
+.copy-button:hover {
+    background: rgba(255,255,255,0.05);
+    color: #fff;
+}
+
+/* 复制成功态 */
+.copy-button.copied {
+    color: #4caf50;
+}
