@@ -1,182 +1,211 @@
 // useAgentService.ts
 import {useRef, useState} from 'react';
-import {useXAgent, useXChat} from '@ant-design/x';
-import {BubbleDataType} from './types';
-import {useUser} from '../../context/UserContext';
-import {showError} from '../../utils/ErrorUtils';
-import {ChatMessage, sendSSERequest, SSEEvent, SSERequestParam} from "../../client/sseClient.ts";
 import {v4 as uuidv4} from 'uuid';
+import {useUser} from '../../context/UserContext';
+import {BubbleDataType} from './types';
+import {ChatMessage, sendSSERequest, SSEEvent, SSERequestParam,} from '../../client/sseClient';
 
-export default function useAgentService() {
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const [loading, setLoading] = useState(false);
+export default function useAgentService(curSessionId: string) {
+  // 为每个 session 管理独立的 AbortController
+  const abortMap = useRef<Record<string, AbortController>>({});
+
+  // 存储每个 session 的消息队列（MessageInfo 包装）
+  const [sessionMsgMap, setSessionMsgMap] = useState<
+    Record<string, BubbleDataType[]>
+  >({});
+
+  // 存储每个 session 的 loading 状态
+  const [loadingMap, setLoadingMap] = useState<Record<string, boolean>>({});
+
   const {user} = useUser();
+  const token = user?.token || '';
 
-  const [agent] = useXAgent<
-    BubbleDataType,
-    ChatMessage | undefined,
-    Partial<BubbleDataType> // SSE 更新字段类型
-  >({
-    request: async (reqVo, {onSuccess, onUpdate, onError}) => {
-      if (!user?.token) {
-        showError(null, 'User not authenticated');
-        return;
-      }
-      if (!reqVo) {
-        showError(null, 'reqVo is null');
-      }
-      // @ts-ignore
-      if (!reqVo!.message) {
-        showError(null, 'Please Input Message');
-        return;
-      }
+  /**
+   * 更新某个 session 的整个消息数组
+   */
+  const updateSessionMsgs = (
+    sessionId: string,
+    msgs: BubbleDataType[]
+  ) => {
+    setSessionMsgMap((prev) => ({
+      ...prev,
+      [sessionId]: msgs,
+    }));
+  };
 
-      // @ts-ignore
-      const sendVo: ChatMessage = reqVo?.message;
-      if (!sendVo.requestParam) {
-        showError(null, 'requestParam is null');
-        return;
-      }
-
-      const requestParam = sendVo.requestParam;
-      const sendMessages = [{role: sendVo.role, content: sendVo.content}];
-      setLoading(true);
-      // 创建初始消息对象
-      const initialMessage: BubbleDataType = {
-        id: uuidv4(),
-        content: '',
-        reasoning_content: '',
-        role: 'assistant',
-        model: '',
-        citations: [],
-        question_id: '',
-        answer_id: '',
-      };
-
-      // 累积的消息对象
-      let messageUpdate: BubbleDataType = {...initialMessage};
-
-      const onEvent = (event: SSEEvent) => {
-        switch (event.type) {
-          case 'start':
-            // 初始化消息
-            onUpdate(initialMessage);
-            break;
-
-          case 'delta': {
-            const deltaData = JSON.parse(event.data);
-            // 更新消息字段
-            messageUpdate = {
-              ...messageUpdate,
-              model: deltaData.model,
-              content: messageUpdate.content + (deltaData.content || ''),
-            };
-            onUpdate(messageUpdate);
-            break;
-          }
-
-          case 'reasoning': {
-            const deltaData = JSON.parse(event.data);
-            // 更新消息字段
-            messageUpdate = {
-              ...messageUpdate,
-              model: deltaData.model,
-              reasoning_content: messageUpdate.reasoning_content + (deltaData.content || ''),
-            };
-            onUpdate(messageUpdate);
-            break;
-          }
-
-          case 'message_id': {
-            const deltaData = JSON.parse(event.data);
-            // 添加完成时的额外数据
-            messageUpdate = {
-              ...messageUpdate,
-              question_id: deltaData.question_id || '',
-              answer_id: deltaData.answer_id || '',
-            };
-            onUpdate(messageUpdate);
-            break;
-          }
-          case 'done': {
-            onSuccess([messageUpdate]);
-            setLoading(false);
-            break;
-          }
-          case 'error':
-            onError(new Error(event.data || 'SSE request failed'));
-            setLoading(false);
-            break;
-
-          default:
-          //console.log(`Unhandled event type: ${event.type}`);
-        }
-      }
-
-      try {
-        // 创建新的 AbortController
-        abortControllerRef.current = new AbortController();
-        const signal = abortControllerRef.current.signal;
-        if (requestParam) {
-          await sendSSERequest(requestParam, onEvent, signal, user.token, sendMessages);
-        }
-
-      } catch (error) {
-        console.error('SSE request failed:', error);
-        onError(error instanceof Error ? error : new Error('Request failed'));
-        setLoading(false);
-      }
-    }
-  });
-
-  // 使用聊天功能
-  const chat = useXChat({
-    agent,
-    requestFallback: (
-      _: BubbleDataType,
-      {error}: { error: Error; messages: BubbleDataType[] }
-    ): BubbleDataType => {
-      setLoading(false);
-      return {
-        content: error.message || '请求失败，请重试！',
-        reasoning_content: '',
-        role: 'assistant',
-      };
-    },
-  });
-
-
-  const {onRequest, messages, setMessages} = chat;
-
-  // 发送消息的函数 - 添加所有需要的参数
-  const sendMessage = (inputRequestParam: SSERequestParam, message: ChatMessage): boolean => {
-    if (!message || !inputRequestParam.session_id) return false;
-    if (loading) return false;
-    message.requestParam = inputRequestParam
-    onRequest(message);
-    return true;
+  /**
+   * 设置某个 session 的 loading
+   */
+  const setLoadingFor = (sessionId: string, value: boolean) => {
+    setLoadingMap((prev) => ({
+      ...prev,
+      [sessionId]: value,
+    }));
   };
 
 
-  // 中止当前请求
-  const abortRequest = () => {
-    if (abortControllerRef.current) {
-      try {
-        abortControllerRef.current.abort();
-      } catch {
-        // 故意吞掉任何异常，不做任何事
+  /**
+   * 发送消息，支持并存多条 SSE 流
+   */
+  const sendMessage = async (
+    param: SSERequestParam,
+    message: ChatMessage
+  ): Promise<boolean> => {
+    const sid = param.session_id;
+    if (!sid || loadingMap[sid]) return false;
+    if (!token) {
+      console.error('User token missing');
+      return false;
+    }
+
+    // 创建新的 AbortController 并保存
+    const controller = new AbortController();
+    abortMap.current[sid] = controller;
+    setLoadingFor(sid, true);
+
+    // 初始化 assistant 消息
+    const userMessage: BubbleDataType = {
+      id: uuidv4(),
+      session_id: message.session_id,
+      content: message.content,
+      role: message.role,
+    }
+    const assistantMessage: BubbleDataType = {
+      id: uuidv4(),
+      session_id: sid,
+      content: '',
+      reasoning_content: '',
+      role: 'assistant',
+      model: '',
+      citations: [],
+      question_id: '',
+      answer_id: '',
+    };
+    updateSessionMsgs(sid, [userMessage, assistantMessage]);
+
+    // 累积内容
+    let acc = {...assistantMessage};
+
+    const onEvent = (event: SSEEvent) => {
+      switch (event.type) {
+        case 'delta': {
+          const d = JSON.parse(event.data);
+          acc = {
+            ...acc,
+            model: d.model,
+            content: acc.content + (d.content || ''),
+          };
+
+          setSessionMsgMap((prev) => {
+            const prevMsgs = prev[sid] || [];
+            return {
+              ...prev,
+              [sid]: [...prevMsgs.slice(0, -1), acc],
+            };
+          });
+          break;
+        }
+        case 'reasoning': {
+          const d = JSON.parse(event.data);
+          acc = {
+            ...acc,
+            model: d.model,
+            reasoning_content: acc.reasoning_content + (d.content || ''),
+          };
+          setSessionMsgMap((prev) => {
+            const prevMsgs = prev[sid] || [];
+            return {
+              ...prev,
+              [sid]: [...prevMsgs.slice(0, -1), acc],
+            };
+          });
+          break;
+        }
+        case 'message_id': {
+          const d = JSON.parse(event.data);
+          acc = {
+            ...acc,
+            question_id: d.question_id || '',
+            answer_id: d.answer_id || '',
+          };
+          setSessionMsgMap((prev) => {
+            const prevMsgs = prev[sid] || [];
+            return {
+              ...prev,
+              [sid]: [...prevMsgs.slice(0, -1), acc],
+            };
+          });
+          break;
+        }
+        case 'done': {
+          setSessionMsgMap((prev) => {
+            const prevMsgs = prev[sid] || [];
+            return {
+              ...prev,
+              [sid]: [...prevMsgs.slice(0, -1), acc],
+            };
+          });
+          setLoadingFor(sid, false);
+          delete abortMap.current[sid];
+          break;
+        }
+        case 'error': {
+          acc.content = (event.data || 'SSE request failed')
+          setSessionMsgMap((prev) => {
+            const prevMsgs = prev[sid] || [];
+            return {
+              ...prev,
+              [sid]: [...prevMsgs.slice(0, -1), acc],
+            };
+          });
+          setLoadingFor(sid, false);
+          delete abortMap.current[sid];
+          console.error('SSE request error:', event.data);
+          break;
+        }
+        default:
+          break;
       }
-      abortControllerRef.current = null;
-      setLoading(false);
+    };
+
+    try {
+      await sendSSERequest(
+        param,
+        onEvent,
+        controller.signal,
+        token,
+        [{session_id: sid, role: message.role, content: message.content}]
+      );
+    } catch (err) {
+      setLoadingFor(sid, false);
+      delete abortMap.current[sid];
+      console.error('sendSSERequest failed:', err);
+    }
+
+    return true;
+  };
+
+  /**
+   * 中断当前 session 的请求流
+   */
+  const abortRequest = () => {
+    const sid = curSessionId;
+    const ctrl = abortMap.current[sid];
+    if (ctrl) {
+      ctrl.abort();
+      delete abortMap.current[sid];
+      setLoadingFor(sid, false);
     }
   };
 
   return {
-    messages,
-    setMessages,
-    loading,
+    // 当前会话的 MessageInfo 数组
+    messages: sessionMsgMap[curSessionId] || [],
+    // 当前会话的 loading 状态
+    loading: !!loadingMap[curSessionId],
     sendMessage,
     abortRequest,
-    agent
+    // 允许外部指定 session 更新消息
+    setMessages: updateSessionMsgs,
   };
 }

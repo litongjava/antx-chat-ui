@@ -5,6 +5,7 @@ if (!BASE_URL) {
 
 // 定义消息数据结构，根据业务需要扩展字段
 export interface ChatMessage {
+  session_id: string;
   role: string;
   content: string;
   requestParam?: SSERequestParam,
@@ -18,7 +19,7 @@ export interface SSEEvent {
 
 // 定义请求参数类型
 export interface SSERequestParam {
-  session_id?: string | null;
+  session_id: string;
   school_id?: string;
   type?: string;
   app_id?: string;

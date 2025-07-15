@@ -1,5 +1,5 @@
-// ChatSider.tsx
-import React, {useEffect} from 'react';
+// ChatSide.tsx
+import React from 'react';
 import {
   DeleteOutlined,
   EditOutlined,
@@ -11,8 +11,6 @@ import {
 import {Conversation, Conversations} from '@ant-design/x';
 import {Button} from 'antd';
 import UserAvatar from '../user/UserAvatar.tsx';
-import {MessageInfo} from "@ant-design/x/es/use-x-chat";
-import {BubbleDataType} from "./types.ts";
 
 interface ConversationItem {
   key: string;
@@ -20,7 +18,7 @@ interface ConversationItem {
   group: string;
 }
 
-interface ChatSiderProps {
+interface ChatSliderProps {
   siderCollapsed: boolean;
   toggleSider: () => void;
   mobileSiderVisible: boolean;
@@ -29,34 +27,23 @@ interface ChatSiderProps {
   curConversation: string; // 这里保持为string
   setCurConversation: (key: string) => void;
   setConversations: (items: ConversationItem[]) => void;
-  setMessages: (messages: MessageInfo<BubbleDataType>[]) => void;
-  messageHistory: Record<string, MessageInfo<BubbleDataType>[]>;
   handleNewConversation: () => void;
   onRename: (sessionId: string, newName: string) => void;
   onDelete: (sessionId: string) => void;
-  loadHistory: (sessionId: string) => void;
 }
 
-const ChatSider: React.FC<ChatSiderProps> = ({
-                                               siderCollapsed,
-                                               toggleSider,
-                                               mobileSiderVisible,
-                                               setMobileSiderVisible,
-                                               conversations,
-                                               curConversation,
-                                               setCurConversation,
-                                               setMessages,
-                                               messageHistory,
-                                               handleNewConversation,
-                                               onRename,
-                                               onDelete,
-                                               loadHistory
-                                             }) => {
-  useEffect(() => {
-    if (curConversation) {
-      loadHistory(curConversation);
-    }
-  }, [curConversation]);
+const ChatSlider: React.FC<ChatSliderProps> = ({
+                                                 siderCollapsed,
+                                                 toggleSider,
+                                                 mobileSiderVisible,
+                                                 setMobileSiderVisible,
+                                                 conversations,
+                                                 curConversation,
+                                                 setCurConversation,
+                                                 handleNewConversation,
+                                                 onRename,
+                                                 onDelete,
+                                               }) => {
 
   const handleRename = (conversation: Conversation) => {
     const defaultName =
@@ -141,13 +128,8 @@ const ChatSider: React.FC<ChatSiderProps> = ({
             activeKey={curConversation} // 这里直接使用，空字符串是安全的
             onActiveChange={async (val) => {
               // 确保val是字符串
-              if (val) {
-                setTimeout(() => {
-                  setCurConversation(val);
-                  setMessages(messageHistory?.[val] || []);
-                }, 100);
-                setMobileSiderVisible(false);
-              }
+              setCurConversation(val);
+              setMobileSiderVisible(false);
             }}
             groupable
             styles={{item: {padding: '0 8px'}}}
@@ -187,4 +169,4 @@ const ChatSider: React.FC<ChatSiderProps> = ({
   );
 };
 
-export default ChatSider;
+export default ChatSlider;

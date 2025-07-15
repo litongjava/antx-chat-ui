@@ -3,7 +3,6 @@ import React, {useCallback, useMemo, useState} from 'react';
 import {Prompts, Welcome} from '@ant-design/x';
 import {Button, Collapse, Flex, Space} from 'antd';
 import {Bubble} from '@ant-design/x/es';
-import {MessageInfo} from '@ant-design/x/es/use-x-chat';
 import {BubbleDataType} from './types.ts';
 import {DESIGN_GUIDE, HOT_TOPICS} from './consts.tsx';
 import ReloadOutlined from '@ant-design/icons/lib/icons/ReloadOutlined';
@@ -13,7 +12,8 @@ import MarkdownRenderer from "./MarkdownRenderer.tsx";
 
 
 interface ChatListProps {
-  messages: MessageInfo<BubbleDataType>[];
+  messages: BubbleDataType[];
+  currentSessionId: string;
   onSubmit: (val: string) => void;
   // 新增 preview 相关 props
   previewHtml: string | null;
@@ -21,11 +21,11 @@ interface ChatListProps {
   previewVisible: boolean;
   setPreviewVisible: React.Dispatch<React.SetStateAction<boolean>>;
   loading: boolean;
-
 }
 
 const ChatMessageList: React.FC<ChatListProps> = ({
                                                     messages,
+                                                    currentSessionId,
                                                     onSubmit,
                                                     setPreviewHtml,
                                                     setPreviewVisible,
@@ -92,17 +92,23 @@ const ChatMessageList: React.FC<ChatListProps> = ({
     [renderMarkdown]
   );
 
+  const filteredMessages = useMemo(() => {
+    return messages.filter(msg =>
+      msg.session_id === currentSessionId
+    );
+  }, [messages, currentSessionId]);
+
   const bubbleItems = useMemo(() => {
-    return messages.map((i) => {
+    return filteredMessages.map((i) => {
       // 确保每条消息都有一个唯一且稳定的 id
-      const msgId = i.message.id
+      const msgId = i.id
 
       const common = {
-        ...i.message,
+        ...i,
         key: msgId,
       };
 
-      if (i.message.role === 'user') {
+      if (i.role === 'user') {
         return {
           ...common,
           className: 'user-message',
@@ -114,7 +120,7 @@ const ChatMessageList: React.FC<ChatListProps> = ({
           ...common,
           className: 'assistant-message',
           messageRender: (content: string) => {
-            return renderAssistantMessage(content, i.message.reasoning_content ?? null);
+            return renderAssistantMessage(content, i.reasoning_content ?? null);
           },
           typing: false,
         };

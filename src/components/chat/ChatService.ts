@@ -1,7 +1,6 @@
 // ChatService.ts
 import {config} from "../../config/config.ts";
 import {showError} from "../../utils/ErrorUtils.ts";
-import {MessageInfo} from "@ant-design/x/es/use-x-chat";
 import {BubbleDataType} from "./types.ts";
 
 
@@ -135,7 +134,7 @@ export class ChatService {
     session_id: string,
     offset: number = 1,
     limit: number = 1000
-  ): Promise<MessageInfo<BubbleDataType>[]> {
+  ): Promise<BubbleDataType[]> {
     try {
       const url = new URL(`${config.base_url}/api/v1/chat/history`);
       url.searchParams.append('session_id', session_id);
@@ -152,15 +151,13 @@ export class ChatService {
 
       if (result.ok && Array.isArray(result.data)) {
         return result.data.map((msg: any) => ({
-          message: {
-            id: msg.id,
-            role: msg.role,
-            content: msg.content,
-            model: msg.model || undefined,
-            citations: msg.citations || undefined,
-            reasoning_content: msg.reasoning_content || undefined,
-          },
-          status: 'done' // 历史记录都是已完成的
+          session_id: session_id,
+          id: msg.id,
+          role: msg.role,
+          content: msg.content,
+          model: msg.model || undefined,
+          citations: msg.citations || undefined,
+          reasoning_content: msg.reasoning_content || undefined,
         }));
       } else {
         throw new Error(result.msg || '获取历史记录失败');
