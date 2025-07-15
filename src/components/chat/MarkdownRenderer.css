@@ -3,22 +3,35 @@
     line-height: 1.6;
 }
 
+/* 简单地回到外部序号 */
 .markdown-content ol {
-    /* 去掉左右内边距和外边距 */
-    padding-inline-start: 0;
-    margin-block-start: 0;
-    /* 如果你还想把数字紧贴内容，可以把序号放到内容内侧 */
-    list-style-position: inside;
-
+    list-style-position: outside;
+    padding-inline-start: 1.2em;
 }
+
+/* 进阶：用 CSS 计数器完全自定义序号 */
+.markdown-content ol {
+    counter-reset: item;
+    list-style: none;
+    padding-left: 0;
+}
+.markdown-content ol > li {
+    counter-increment: item;
+    position: relative;
+    padding-left: 2em;
+}
+.markdown-content ol > li::before {
+    content: counter(item) ". ";
+    position: absolute;
+    left: 0;
+}
+
 
 .markdown-content ul {
-    /* 去掉左右内边距和外边距 */
-    padding-inline-start: 0;
-    margin-block-start: 0;
-    /* 如果你还想把数字紧贴内容，可以把序号放到内容内侧 */
-    list-style-position: inside;
+    list-style-position: outside;
+    padding-inline-start: 1.2rem;
 }
+
 
 /* 表格容器 */
 .table-container {

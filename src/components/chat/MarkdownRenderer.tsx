@@ -42,6 +42,16 @@ const MarkdownRendererImpl: React.FC<MarkdownRendererImplProps> = ({content, cla
         remarkPlugins={[remarkMath, remarkGfm]}
         rehypePlugins={[rehypeKatex]}
         components={{
+          a: ({ href, children, ...props }) => (
+            <a
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              {...props}
+            >
+              {children}
+            </a>
+          ),
           code: ({node, inline, className: langClass, children, ...props}: any) => {
             const match = /language-(\w+)/.exec(langClass || '');
             if (inline || !match) {
