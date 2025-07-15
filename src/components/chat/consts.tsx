@@ -109,9 +109,14 @@ export const MODEL_OPTIONS = [
   {label: 'DeepSeek (R1)', value: 'deepseek-r1'},
 ];
 
+export const TYPE_OPTIONS = [
+  {label: 'General', value: 'genearl'},
+  {label: 'Translate', value: 'translate'},
+]
+
+
 export const TOOL_OPTIONS = [
   {label: 'Search', value: 'search'},
   {label: 'Linux', value: 'linux'},
-  {label: 'Translate', value: 'translate'},
   {label: 'Browser', value: 'browser'},
 ];

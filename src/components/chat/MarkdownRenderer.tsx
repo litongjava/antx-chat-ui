@@ -9,7 +9,7 @@ import CodeBlokTools from "../CodeBlokTools.tsx";
 import './CodeBlock.css';
 import './MarkdownRenderer.css'
 
-interface MathMarkdownRendererProps {
+interface MarkdownRendererImplProps {
   /** The markdown content to render, possibly containing LaTeX expressions */
   content: string;
   /** Optional additional className for the wrapper div */
@@ -17,7 +17,7 @@ interface MathMarkdownRendererProps {
   onRunCode?: (code: string, language: string) => void;
 }
 
-const MarkdownRenderer: React.FC<MathMarkdownRendererProps> = ({content, className, onRunCode}) => {
+const MarkdownRendererImpl: React.FC<MarkdownRendererImplProps> = ({content, className, onRunCode}) => {
   const processedContent = useMemo(() => {
     if (!content) return content;
 
@@ -93,4 +93,9 @@ const MarkdownRenderer: React.FC<MathMarkdownRendererProps> = ({content, classNa
   );
 };
 
-export default MarkdownRenderer;
+export default React.memo(
+  MarkdownRendererImpl,
+  (prev, next) => {
+    return prev.content === next.content
+  }
+);

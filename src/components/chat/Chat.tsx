@@ -13,6 +13,7 @@ import {ChatService} from "./ChatService.ts";
 import {showError} from "../../utils/ErrorUtils.ts";
 import useAgentService from "./useAgentService.ts";
 import {SSERequestParam} from "../../client/sseClient.ts";
+import {TYPE_OPTIONS} from "./consts.tsx";
 
 const Chat: React.FC = () => {
   const {
@@ -37,6 +38,7 @@ const Chat: React.FC = () => {
 
   const [provider, setProvider] = useState<string>('volcengine');
   const [model, setModel] = useState<string>('deepseek-v3');
+  const [type, setType] = useState<string>(TYPE_OPTIONS[0].value);
   const [tools, setTools] = useState<string[]>([]);
   const [siderCollapsed, setSiderCollapsed] = useState(false);
   const [mobileSiderVisible, setMobileSiderVisible] = useState(false);
@@ -58,6 +60,7 @@ const Chat: React.FC = () => {
     const requestParam: SSERequestParam = {
       session_id: curConversation,
       provider: provider,
+      type: type,
       model: model,
       tools: tools,
     }
@@ -257,6 +260,8 @@ const Chat: React.FC = () => {
           setProvider={setProvider}
           model={model}
           setModel={setModel}
+          type={type}
+          setType={setType}
           tools={tools}
           setTools={setTools}
           loading={loading}

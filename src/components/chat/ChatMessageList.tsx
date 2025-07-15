@@ -1,5 +1,5 @@
 // ChatMessageList.tsx
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
 import {Prompts, Welcome} from '@ant-design/x';
 import {Button, Collapse, Flex, Space, Spin} from 'antd';
 import {Bubble} from '@ant-design/x/es';
@@ -79,33 +79,51 @@ const ChatMessageList: React.FC<ChatListProps> = ({
       });
   }, []);
 
+  const renderUserMessage = useCallback(
+    (raw: string) => renderMarkdown(raw),
+    [renderMarkdown]
+  );
+
+  const renderAssistantMessage = useCallback(
+    (raw: string, reasoning: string | null) =>
+      renderMarkdown(raw, reasoning),
+    [renderMarkdown]
+  );
+
+// typing 配置也 memoize
+  const typingConfig = useMemo(
+    () => ({ step: 5, interval: 20, suffix: <Spin size="small"/> }),
+    []
+  );
+
+  const bubbleItems = useMemo(() => {
+    return messages.map((i, index) => {
+      const common = { ...i.message, _index: index };
+      if (i.message.role === 'user') {
+        return {
+          ...common,
+          className: 'user-message',
+          messageRender: renderUserMessage,
+          typing: false,
+        };
+      } else {
+        return {
+          ...common,
+          className: 'assistant-message',
+          messageRender: (content: string) =>
+            renderAssistantMessage(content, i.message.reasoning_content ?? null),
+          typing: i.status === 'loading' ? typingConfig : false,
+        };
+      }
+    });
+  }, [messages, renderUserMessage, renderAssistantMessage, typingConfig]);
+
   return (
     <div className="chatList">
       {messages?.length ? (
         /* 🌟 消息列表 */
         <Bubble.List
-          items={messages?.map((i, index) => {
-            const {message, status} = i;
-            if (message?.role === 'user') {
-              return {
-                ...i.message,
-                className: `${status === 'loading' ? 'loadingMessage ' : ''}user-message`,
-                messageRender: renderMarkdown,
-                // 添加索引属性
-                _index: index
-              };
-            } else {
-              return {
-                ...i.message,
-                className: `${status === 'loading' ? 'loadingMessage ' : ''}assistant-message`,
-                messageRender: (content: string) =>
-                  renderMarkdown(content, i.message.reasoning_content ?? null),
-                typing: status === 'loading' ? {step: 5, interval: 20, suffix: <Spin size="small"/>} : false,
-                // 添加索引属性
-                _index: index
-              };
-            }
-          })}
+          items={bubbleItems}
           style={{height: '100%', paddingInline: 'calc(calc(100% - 900px) /2)'}}
           roles={{
             assistant: {

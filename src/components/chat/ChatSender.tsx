@@ -3,7 +3,7 @@ import React from 'react';
 import {Attachments, Prompts, Sender} from '@ant-design/x';
 import {Button, Flex, Select, Tag, Tooltip} from 'antd';
 import {CloudUploadOutlined, PaperClipOutlined,} from '@ant-design/icons';
-import {MODEL_OPTIONS, PROVIDER_OPTIONS, SENDER_PROMPTS, TOOL_OPTIONS} from './consts.tsx';
+import {MODEL_OPTIONS, PROVIDER_OPTIONS, SENDER_PROMPTS, TOOL_OPTIONS, TYPE_OPTIONS} from './consts.tsx';
 import {AttachmentFile} from './types.ts';
 
 interface ChatSenderProps {
@@ -14,6 +14,8 @@ interface ChatSenderProps {
   setProvider: (model: string) => void;
   model: string;
   setModel: (model: string) => void;
+  type: string;
+  setType: (type: string) => void;
   tools: string[];
   setTools: (tools: string[]) => void;
   loading: boolean;
@@ -27,10 +29,12 @@ const ChatSender: React.FC<ChatSenderProps> = ({
                                                  inputValue,
                                                  setInputValue,
                                                  onSubmit,
-                                                 model,
-                                                 setModel,
                                                  provider,
                                                  setProvider,
+                                                 model,
+                                                 setModel,
+                                                 type,
+                                                 setType,
                                                  tools,
                                                  setTools,
                                                  loading,
@@ -93,8 +97,17 @@ const ChatSender: React.FC<ChatSenderProps> = ({
             options={MODEL_OPTIONS}
             styles={{popup: {root: {minWidth: 180}}}}
           />
-
         </Tooltip>
+
+        <Tooltip title="Select type" placement="top">
+          <Select
+            value={type}
+            onChange={setType}
+            options={TYPE_OPTIONS}
+            styles={{popup: {root: {minWidth: 180}}}}
+          />
+        </Tooltip>
+
 
         <Tooltip title="Select Tools" placement="top">
           <Select

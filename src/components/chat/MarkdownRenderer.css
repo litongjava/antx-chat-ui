@@ -1,4 +1,18 @@
+.markdown-content {
+    font-size: 16px;
+    line-height: 1.6;
+}
+
 .markdown-content ol {
+    /* 去掉左右内边距和外边距 */
+    padding-inline-start: 0;
+    margin-block-start: 0;
+    /* 如果你还想把数字紧贴内容，可以把序号放到内容内侧 */
+    list-style-position: inside;
+
+}
+
+.markdown-content ul {
     /* 去掉左右内边距和外边距 */
     padding-inline-start: 0;
     margin-block-start: 0;
