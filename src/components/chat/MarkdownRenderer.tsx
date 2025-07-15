@@ -7,6 +7,7 @@ import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter';
 import 'katex/dist/katex.min.css';
 import CodeBlokTools from "../CodeBlokTools.tsx";
 import './CodeBlock.css';
+import './MarkdownRenderer.css'
 
 interface MathMarkdownRendererProps {
   /** The markdown content to render, possibly containing LaTeX expressions */
@@ -16,7 +17,7 @@ interface MathMarkdownRendererProps {
   onRunCode?: (code: string, language: string) => void;
 }
 
-const MathMarkdownRenderer: React.FC<MathMarkdownRendererProps> = ({content, className, onRunCode}) => {
+const MarkdownRenderer: React.FC<MathMarkdownRendererProps> = ({content, className, onRunCode}) => {
   const processedContent = useMemo(() => {
     if (!content) return content;
 
@@ -92,4 +93,4 @@ const MathMarkdownRenderer: React.FC<MathMarkdownRendererProps> = ({content, cla
   );
 };
 
-export default MathMarkdownRenderer;
+export default MarkdownRenderer;

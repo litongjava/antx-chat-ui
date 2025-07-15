@@ -9,7 +9,7 @@ import {DESIGN_GUIDE, HOT_TOPICS} from './consts.tsx';
 import ReloadOutlined from '@ant-design/icons/lib/icons/ReloadOutlined';
 import {CopyOutlined, DislikeOutlined, EllipsisOutlined, LikeOutlined, ShareAltOutlined} from "@ant-design/icons";
 import 'katex/dist/katex.min.css';
-import MathMarkdownRenderer from "./MathMarkdownRenderer.tsx";
+import MarkdownRenderer from "./MarkdownRenderer.tsx";
 
 
 interface ChatListProps {
@@ -23,17 +23,12 @@ interface ChatListProps {
 
 }
 
-
 const ChatMessageList: React.FC<ChatListProps> = ({
                                                     messages,
                                                     onSubmit,
                                                     setPreviewHtml,
                                                     setPreviewVisible
                                                   }) => {
-  const [showToast, setShowToast] = useState(false);
-  const [toastType, setToastType] = useState<'success' | 'error'>('success');
-
-
   const renderMarkdown = (raw: string, reasoning?: string | null) => (
     <div className="markdown-content">
       {reasoning && (
@@ -44,7 +39,7 @@ const ChatMessageList: React.FC<ChatListProps> = ({
             key: '1',
             label: 'Thought',
             children: (
-              <MathMarkdownRenderer content={reasoning} onRunCode={(code, lang) => {
+              <MarkdownRenderer content={reasoning} onRunCode={(code, lang) => {
                 if (lang === 'html') {
                   setPreviewHtml(code);
                   setPreviewVisible(true);
@@ -56,7 +51,7 @@ const ChatMessageList: React.FC<ChatListProps> = ({
           }]}
         />
       )}
-      <MathMarkdownRenderer content={raw} onRunCode={(code, lang) => {
+      <MarkdownRenderer content={raw} onRunCode={(code, lang) => {
         if (lang === 'html') {
           setPreviewHtml(code);
           setPreviewVisible(true);
@@ -66,6 +61,9 @@ const ChatMessageList: React.FC<ChatListProps> = ({
       }}/>
     </div>
   );
+
+  const [showToast, setShowToast] = useState(false);
+  const [toastType, setToastType] = useState<'success' | 'error'>('success');
 
   const handleCopy = useCallback((text: string) => {
     navigator.clipboard.writeText(text)
