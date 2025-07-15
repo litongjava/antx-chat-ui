@@ -111,7 +111,7 @@ export const MODEL_OPTIONS = [
 
 export const TYPE_OPTIONS = [
   {label: 'General', value: 'genearl'},
-  {label: 'Translate', value: 'translate'},
+  {label: 'Translator', value: 'translator'},
 ]
 
 

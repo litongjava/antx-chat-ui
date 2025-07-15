@@ -1,7 +1,7 @@
 // ChatMessageList.tsx
 import React, {useCallback, useMemo, useState} from 'react';
 import {Prompts, Welcome} from '@ant-design/x';
-import {Button, Collapse, Flex, Space, Spin} from 'antd';
+import {Button, Collapse, Flex, Space} from 'antd';
 import {Bubble} from '@ant-design/x/es';
 import {MessageInfo} from '@ant-design/x/es/use-x-chat';
 import {BubbleDataType} from './types.ts';
@@ -92,13 +92,6 @@ const ChatMessageList: React.FC<ChatListProps> = ({
     [renderMarkdown]
   );
 
-// typing 配置也 memoize
-  const typingConfig = useMemo(
-    () => ({step: 5, interval: 20, suffix: <Spin size="small"/>}),
-    []
-  );
-
-
   const bubbleItems = useMemo(() => {
     return messages.map((i) => {
       // 确保每条消息都有一个唯一且稳定的 id
@@ -127,7 +120,7 @@ const ChatMessageList: React.FC<ChatListProps> = ({
         };
       }
     });
-  }, [messages, renderUserMessage, renderAssistantMessage, typingConfig]);
+  }, [messages, renderUserMessage, renderAssistantMessage]);
 
 
   return (

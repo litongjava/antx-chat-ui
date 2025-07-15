@@ -1,7 +1,8 @@
+//CodeBlock.tsx
 import React from 'react';
 import MermaidRenderer from './MermaidRenderer';
 import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter';
-import CodeBlokTools from '../CodeBlokTools';
+import CodeBlokTools from './CodeBlokTools.tsx';
 import './CodeBlock.css';
 
 interface CodeBlockProps {

@@ -1,3 +1,4 @@
+///MarkdownRenderer.tsx
 import React, {useMemo} from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';

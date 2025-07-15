@@ -1,4 +1,4 @@
-// src/services/ChatService.ts
+// ChatService.ts
 import {config} from "../../config/config.ts";
 import {showError} from "../../utils/ErrorUtils.ts";
 import {MessageInfo} from "@ant-design/x/es/use-x-chat";
