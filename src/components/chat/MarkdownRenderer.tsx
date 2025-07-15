@@ -21,21 +21,9 @@ interface MarkdownRendererImplProps {
 const MarkdownRendererImpl: React.FC<MarkdownRendererImplProps> = ({content, className, loading, onRunCode}) => {
   const processedContent = useMemo(() => {
     if (!content) return content;
-
-    let processed = content;
-    // 将 \( \) 转换为 $ $
-    processed = processed.replace(/\\\((.*?)\\\)/g, '$$$1$$');
-    // 将 \[ \] 转换为 $$ $$
-    processed = processed.replace(/\\\[(.*?)\\\]/gs, '$$$$\n$1\n$$$$');
-    // 处理常见的 LaTeX 数学环境
-    const mathEnvironments = ['equation', 'align', 'gather', 'multline', 'split', 'cases'];
-    mathEnvironments.forEach(env => {
-      const regex = new RegExp(`\\\\begin\\{${env}\\}(.*?)\\\\end\\{${env}\\}`, 'gs');
-      processed = processed.replace(regex, `$$\n\\\\begin{${env}}$1\\\\end{${env}}\n$$`);
-    });
-
-    return processed;
+    return content.replace(/\\\((.+?)\\\)/g, '$$$1$$').replace(/\\\[(.+?)\\\]/gs, '$$$$\n$1\n$$$$');
   }, [content]);
+
 
   return (
     <div className={className}>

@@ -13,7 +13,6 @@ interface CodeBlockProps {
 }
 
 const CodeBlock: React.FC<CodeBlockProps> = ({code, language, loading, onRunCode}) => {
-  console.log("loading:{}",loading)
   if (language === 'mermaid' && !loading) {
     return <MermaidRenderer chart={code.trim()}/>;
   }
