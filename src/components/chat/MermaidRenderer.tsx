@@ -15,7 +15,6 @@ const MermaidRenderer: React.FC<MermaidRendererProps> = ({chart}) => {
   const [scale, setScale] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const [currentSvg, setCurrentSvg] = useState('');
-  const [isRendered, setIsRendered] = useState(false);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -33,11 +32,9 @@ const MermaidRenderer: React.FC<MermaidRendererProps> = ({chart}) => {
 
           const id = 'mmd-' + Math.random().toString(36).slice(2, 9);
           const {svg} = await mermaid.render(id, chart);
-
           // 直接设置容器内容
           containerRef.current.innerHTML = svg;
           setCurrentSvg(svg);
-          setIsRendered(true);
         } catch (err) {
           console.error('Mermaid 渲染出错：', err);
           if (containerRef.current) {
