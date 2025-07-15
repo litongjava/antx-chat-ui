@@ -10,6 +10,7 @@ interface ChatSenderProps {
   inputValue: string;
   setInputValue: (value: string) => void;
   onSubmit: (val: string) => void;
+  onCancel?: VoidFunction | undefined
   provider: string;
   setProvider: (model: string) => void;
   model: string;
@@ -29,6 +30,7 @@ const ChatSender: React.FC<ChatSenderProps> = ({
                                                  inputValue,
                                                  setInputValue,
                                                  onSubmit,
+                                                 onCancel,
                                                  provider,
                                                  setProvider,
                                                  model,
@@ -134,9 +136,7 @@ const ChatSender: React.FC<ChatSenderProps> = ({
           setInputValue('');
         }}
         onChange={setInputValue}
-        onCancel={() => {
-          // 取消逻辑需要在父组件实现
-        }}
+        onCancel={onCancel}
         prefix={
           <Button
             type="text"

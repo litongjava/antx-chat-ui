@@ -92,13 +92,21 @@ const ChatMessageList: React.FC<ChatListProps> = ({
 
 // typing 配置也 memoize
   const typingConfig = useMemo(
-    () => ({ step: 5, interval: 20, suffix: <Spin size="small"/> }),
+    () => ({step: 5, interval: 20, suffix: <Spin size="small"/>}),
     []
   );
 
+
   const bubbleItems = useMemo(() => {
-    return messages.map((i, index) => {
-      const common = { ...i.message, _index: index };
+    return messages.map((i) => {
+      // 确保每条消息都有一个唯一且稳定的 id
+      const msgId = i.message.id
+
+      const common = {
+        ...i.message,
+        key: msgId,
+      };
+
       if (i.message.role === 'user') {
         return {
           ...common,
@@ -110,13 +118,15 @@ const ChatMessageList: React.FC<ChatListProps> = ({
         return {
           ...common,
           className: 'assistant-message',
-          messageRender: (content: string) =>
-            renderAssistantMessage(content, i.message.reasoning_content ?? null),
-          typing: i.status === 'loading' ? typingConfig : false,
+          messageRender: (content: string) => {
+            return renderAssistantMessage(content, i.message.reasoning_content ?? null);
+          },
+          typing: false,
         };
       }
     });
   }, [messages, renderUserMessage, renderAssistantMessage, typingConfig]);
+
 
   return (
     <div className="chatList">

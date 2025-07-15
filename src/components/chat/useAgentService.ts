@@ -5,6 +5,7 @@ import {BubbleDataType} from './types';
 import {useUser} from '../../context/UserContext';
 import {showError} from '../../utils/ErrorUtils';
 import {ChatMessage, sendSSERequest, SSEEvent, SSERequestParam} from "../../client/sseClient.ts";
+import {v4 as uuidv4} from 'uuid';
 
 export default function useAgentService() {
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -39,12 +40,10 @@ export default function useAgentService() {
 
       const requestParam = sendVo.requestParam;
       const sendMessages = [{role: sendVo.role, content: sendVo.content}];
-
-
       setLoading(true);
-
       // 创建初始消息对象
       const initialMessage: BubbleDataType = {
+        id: uuidv4(),
         content: '',
         reasoning_content: '',
         role: 'assistant',
@@ -97,7 +96,6 @@ export default function useAgentService() {
               answer_id: deltaData.answer_id || '',
             };
             onUpdate(messageUpdate);
-            setLoading(false);
             break;
           }
           case 'done': {
@@ -111,7 +109,7 @@ export default function useAgentService() {
             break;
 
           default:
-            //console.log(`Unhandled event type: ${event.type}`);
+          //console.log(`Unhandled event type: ${event.type}`);
         }
       }
 
@@ -163,7 +161,11 @@ export default function useAgentService() {
   // 中止当前请求
   const abortRequest = () => {
     if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
+      try {
+        abortControllerRef.current.abort();
+      } catch {
+        // 故意吞掉任何异常，不做任何事
+      }
       abortControllerRef.current = null;
       setLoading(false);
     }

@@ -21,7 +21,8 @@ const Chat: React.FC = () => {
     setMessages,
     loading,
     sendMessage,
-    agent
+    agent,
+    abortRequest,
   } = useAgentService();
 
   // ==================== State ====================
@@ -256,6 +257,7 @@ const Chat: React.FC = () => {
           inputValue={inputValue}
           setInputValue={setInputValue}
           onSubmit={onSubmit}
+          onCancel={abortRequest}
           provider={provider}
           setProvider={setProvider}
           model={model}
