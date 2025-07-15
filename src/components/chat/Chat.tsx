@@ -1,7 +1,7 @@
 // Chat.tsx
 import {CloseOutlined, MenuUnfoldOutlined, PlusOutlined,} from '@ant-design/icons';
 import {Button, message} from 'antd';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import './Chat.css';
 import {ConversationItem} from './types.ts';
 import ChatSlider from './ChatSlider.tsx';
@@ -17,6 +17,9 @@ const Chat: React.FC = () => {
   const [curConversation, setCurConversation] = useState<string>('');
 
   const [siderCollapsed, setSiderCollapsed] = useState(false);
+
+  const newSessionRef = useRef(false);
+
   const [mobileSiderVisible, setMobileSiderVisible] = useState(false);
   const [previewHtml, setPreviewHtml] = useState<string | null>(null);
   const [previewVisible, setPreviewVisible] = useState(false);
@@ -47,6 +50,7 @@ const Chat: React.FC = () => {
         if (sessions.length === 0) {
           await handleNewConversation();
         } else {
+          newSessionRef.current=false;
           setCurConversation(sessions[0].key);
         }
       } catch (error) {
@@ -71,6 +75,7 @@ const Chat: React.FC = () => {
     if (newSession) {
       setConversations(prev => [newSession, ...prev]);
       setCurConversation(newSession.key);
+      newSessionRef.current=true;
       return newSession; // 返回新创建的会话
     }
   };
@@ -107,6 +112,7 @@ const Chat: React.FC = () => {
 
       if (sessionId === curConversation) {
         const newKey = newList[0]?.key || '';
+        newSessionRef.current=false;
         setCurConversation(newKey);
       }
     } else {
@@ -145,11 +151,11 @@ const Chat: React.FC = () => {
         handleNewConversation={handleNewConversation}
         onRename={handleRenameSession}
         onDelete={handleDeleteSession}
-
+        newSessionRef={newSessionRef}
       />
 
-
-      <ChatWindow curConversation={curConversation} previewHtml={previewHtml} setPreviewHtml={setPreviewHtml}
+      <ChatWindow curConversation={curConversation} newSessionRef={newSessionRef}
+                  previewHtml={previewHtml} setPreviewHtml={setPreviewHtml}
                   previewVisible={previewVisible} setPreviewVisible={setPreviewVisible}/>
 
       {previewVisible && (

@@ -19,17 +19,18 @@ interface ConversationItem {
 }
 
 interface ChatSliderProps {
-  siderCollapsed: boolean;
-  toggleSider: () => void;
-  mobileSiderVisible: boolean;
-  setMobileSiderVisible: (visible: boolean) => void;
-  conversations: ConversationItem[];
-  curConversation: string; // 这里保持为string
-  setCurConversation: (key: string) => void;
-  setConversations: (items: ConversationItem[]) => void;
-  handleNewConversation: () => void;
-  onRename: (sessionId: string, newName: string) => void;
-  onDelete: (sessionId: string) => void;
+  siderCollapsed: boolean,
+  toggleSider: () => void,
+  mobileSiderVisible: boolean,
+  setMobileSiderVisible: (visible: boolean) => void,
+  conversations: ConversationItem[],
+  curConversation: string,
+  setCurConversation: (key: string) => void,
+  setConversations: (items: ConversationItem[]) => void,
+  handleNewConversation: () => void,
+  onRename: (sessionId: string, newName: string) => void,
+  onDelete: (sessionId: string) => void,
+  newSessionRef: React.RefObject<boolean>
 }
 
 const ChatSlider: React.FC<ChatSliderProps> = ({
@@ -43,6 +44,7 @@ const ChatSlider: React.FC<ChatSliderProps> = ({
                                                  handleNewConversation,
                                                  onRename,
                                                  onDelete,
+                                                 newSessionRef
                                                }) => {
 
   const handleRename = (conversation: Conversation) => {
@@ -129,6 +131,7 @@ const ChatSlider: React.FC<ChatSliderProps> = ({
             onActiveChange={async (val) => {
               // 确保val是字符串
               setCurConversation(val);
+              newSessionRef.current = false;
               setMobileSiderVisible(false);
             }}
             groupable

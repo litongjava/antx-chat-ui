@@ -11,15 +11,15 @@ import MarkdownRenderer from "./MarkdownRenderer.tsx";
 
 
 interface ChatListProps {
-  messages: BubbleDataType[];
-  currentSessionId: string;
-  onSubmit: (val: string) => void;
-  // 新增 preview 相关 props
-  previewHtml: string | null;
-  setPreviewHtml: React.Dispatch<React.SetStateAction<string | null>>;
-  previewVisible: boolean;
-  setPreviewVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  loading: boolean;
+  messages: BubbleDataType[],
+  currentSessionId: string,
+  newSessionRef: React.RefObject<boolean>
+  onSubmit: (val: string) => void,
+  previewHtml: string | null,
+  setPreviewHtml: React.Dispatch<React.SetStateAction<string | null>>,
+  previewVisible: boolean,
+  setPreviewVisible: React.Dispatch<React.SetStateAction<boolean>>,
+  loading: boolean,
 }
 
 const ChatMessageList: React.FC<ChatListProps> = ({
@@ -28,7 +28,7 @@ const ChatMessageList: React.FC<ChatListProps> = ({
                                                     onSubmit,
                                                     setPreviewHtml,
                                                     setPreviewVisible,
-                                                    loading
+                                                    loading,
                                                   }) => {
   const renderMarkdown = (raw: string, reasoning?: string | null) => (
     <div className="markdown-content">
@@ -131,119 +131,118 @@ const ChatMessageList: React.FC<ChatListProps> = ({
     });
   }, [messages, renderUserMessage, renderAssistantMessage]);
 
+  const welcome = <><Space
+    direction="vertical"
+    size={16}
+    style={{paddingInline: 'calc(calc(100% - 900px) /2)'}}
+    className="placeholder"
+  >
+    <Welcome
+      variant="borderless"
+      icon="https://mdn.alipayobjects.com/huamei_iwk9zp/afts/img/A*s5sNRo5LjfQAAAAAAAAAAAAADgCCAQ/fmt.webp"
+      title="Hello, I'm Ant Design X"
+      description="Base on Ant Design, AGI product interface solution, create a better intelligent vision~"
+      extra={
+        <Space>
+          <Button icon={<ShareAltOutlined/>}/>
+          <Button icon={<EllipsisOutlined/>}/>
+        </Space>
+      }
+    />
+    <Flex gap={16} wrap="wrap">
+      <Prompts
+        items={[HOT_TOPICS]}
+        styles={{
+          list: {height: '100%'},
+          item: {
+            flex: 1,
+            minWidth: 300,
+            backgroundImage: 'linear-gradient(123deg, #e5f4ff 0%, #efe7ff 100%)',
+            borderRadius: 12,
+            border: 'none',
+          },
+          subItem: {padding: 0, background: 'transparent'},
+        }}
+        onItemClick={(info) => {
+          onSubmit(info.data.description as string);
+        }}
+        className="chatPrompt"
+      />
 
+      <Prompts
+        items={[DESIGN_GUIDE]}
+        styles={{
+          item: {
+            flex: 1,
+            minWidth: 300,
+            backgroundImage: 'linear-gradient(123deg, #e5f4ff 0%, #efe7ff 100%)',
+            borderRadius: 12,
+            border: 'none',
+          },
+          subItem: {background: '#ffffffa6'},
+        }}
+        onItemClick={(info) => {
+          onSubmit(info.data.description as string);
+        }}
+        className="chatPrompt"
+      />
+    </Flex>
+  </Space></>;
+
+  const mesasgeList = <><Bubble.List
+    items={bubbleItems}
+    style={{height: '100%', paddingInline: 'calc(calc(100% - 900px) /2)'}}
+    roles={{
+      assistant: {
+        placement: 'start',
+        variant: 'borderless',
+        footer: (item: string) => (
+          <div style={{display: 'flex'}}>
+            <Button type="text" size="small" icon={<ReloadOutlined/>}/>
+            <Button
+              type="text"
+              size="small"
+              icon={<CopyOutlined/>}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (item) handleCopy(item);
+              }}
+            />
+            <Button type="text" size="small" icon={<LikeOutlined/>}/>
+            <Button type="text" size="small" icon={<DislikeOutlined/>}/>
+          </div>
+        ),
+      },
+      user: {
+        placement: 'end',
+        variant: 'filled',
+        footer: (item: string) => (
+          <div
+            style={{
+              display: 'flex',
+              position: 'relative',
+              top: '-8px',
+            }}
+          >
+            <Button
+              type="text"
+              size="small"
+              icon={<CopyOutlined/>}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (item) handleCopy(item);
+              }}
+            />
+          </div>
+        ),
+      },
+    }}
+  /></>;
   return (
     <div className="chatList">
-      {messages?.length ? (
-        /* 🌟 消息列表 */
-        <Bubble.List
-          items={bubbleItems}
-          style={{height: '100%', paddingInline: 'calc(calc(100% - 900px) /2)'}}
-          roles={{
-            assistant: {
-              placement: 'start',
-              variant: 'borderless',
-              footer: (item: string) => (
-                <div style={{display: 'flex'}}>
-                  <Button type="text" size="small" icon={<ReloadOutlined/>}/>
-                  <Button
-                    type="text"
-                    size="small"
-                    icon={<CopyOutlined/>}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (item) handleCopy(item);
-                    }}
-                  />
-                  <Button type="text" size="small" icon={<LikeOutlined/>}/>
-                  <Button type="text" size="small" icon={<DislikeOutlined/>}/>
-                </div>
-              ),
-            },
-            user: {
-              placement: 'end',
-              variant: 'filled',
-              footer: (item: string) => (
-                <div
-                  style={{
-                    display: 'flex',
-                    position: 'relative',
-                    top: '-8px',
-                  }}
-                >
-                  <Button
-                    type="text"
-                    size="small"
-                    icon={<CopyOutlined/>}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (item) handleCopy(item);
-                    }}
-                  />
-                </div>
-              ),
-            },
-          }}
-        />
-      ) : (
-        <Space
-          direction="vertical"
-          size={16}
-          style={{paddingInline: 'calc(calc(100% - 900px) /2)'}}
-          className="placeholder"
-        >
-          <Welcome
-            variant="borderless"
-            icon="https://mdn.alipayobjects.com/huamei_iwk9zp/afts/img/A*s5sNRo5LjfQAAAAAAAAAAAAADgCCAQ/fmt.webp"
-            title="Hello, I'm Ant Design X"
-            description="Base on Ant Design, AGI product interface solution, create a better intelligent vision~"
-            extra={
-              <Space>
-                <Button icon={<ShareAltOutlined/>}/>
-                <Button icon={<EllipsisOutlined/>}/>
-              </Space>
-            }
-          />
-          <Flex gap={16} wrap="wrap">
-            <Prompts
-              items={[HOT_TOPICS]}
-              styles={{
-                list: {height: '100%'},
-                item: {
-                  flex: 1,
-                  minWidth: 300,
-                  backgroundImage: 'linear-gradient(123deg, #e5f4ff 0%, #efe7ff 100%)',
-                  borderRadius: 12,
-                  border: 'none',
-                },
-                subItem: {padding: 0, background: 'transparent'},
-              }}
-              onItemClick={(info) => {
-                onSubmit(info.data.description as string);
-              }}
-              className="chatPrompt"
-            />
 
-            <Prompts
-              items={[DESIGN_GUIDE]}
-              styles={{
-                item: {
-                  flex: 1,
-                  minWidth: 300,
-                  backgroundImage: 'linear-gradient(123deg, #e5f4ff 0%, #efe7ff 100%)',
-                  borderRadius: 12,
-                  border: 'none',
-                },
-                subItem: {background: '#ffffffa6'},
-              }}
-              onItemClick={(info) => {
-                onSubmit(info.data.description as string);
-              }}
-              className="chatPrompt"
-            />
-          </Flex>
-        </Space>
-      )}
+      {bubbleItems?.length ? mesasgeList : welcome}
+
       {showToast && (
         <div style={{
           position: 'fixed',

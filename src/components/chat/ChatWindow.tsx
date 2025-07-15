@@ -14,10 +14,11 @@ import {useUser} from "../../context/UserContext.tsx";
 
 interface ChatWindowProps {
   curConversation: string,
-  previewHtml: string | null;
-  setPreviewHtml: React.Dispatch<React.SetStateAction<string | null>>;
-  previewVisible: boolean;
-  setPreviewVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  previewHtml: string | null,
+  setPreviewHtml: React.Dispatch<React.SetStateAction<string | null>>,
+  previewVisible: boolean,
+  setPreviewVisible: React.Dispatch<React.SetStateAction<boolean>>,
+  newSessionRef: React.RefObject<boolean>
 }
 
 const ChatWindow: React.FC<ChatWindowProps> = ({
@@ -25,7 +26,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                                                  previewHtml,
                                                  setPreviewHtml,
                                                  previewVisible,
-                                                 setPreviewVisible
+                                                 setPreviewVisible,
+                                                 newSessionRef,
                                                }) => {
   const {
     messages,
@@ -97,6 +99,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         messages={messages}
         onSubmit={onSubmit}
         currentSessionId={curConversation}
+        newSessionRef={newSessionRef}
         previewHtml={previewHtml}
         setPreviewHtml={setPreviewHtml}
         previewVisible={previewVisible}
