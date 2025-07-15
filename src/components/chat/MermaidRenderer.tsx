@@ -100,52 +100,64 @@ const MermaidRenderer: React.FC<MermaidRendererProps> = ({chart}) => {
   };
 
   const downloadPNG = async () => {
-    if (!currentSvg) return;
+    if (!currentSvg || !containerRef.current) return;
 
     try {
-      // 创建新的Image对象
+      // 获取渲染后的 SVG 元素
+      const svgElement = containerRef.current.querySelector('svg');
+      if (!svgElement) throw new Error('找不到 SVG 元素');
+
+      // 创建新的 SVG 字符串，添加背景矩形
+      const svgWithBackground = `
+      <svg xmlns="http://www.w3.org/2000/svg" 
+           width="${svgElement.clientWidth}" 
+           height="${svgElement.clientHeight}" 
+           viewBox="0 0 ${svgElement.clientWidth} ${svgElement.clientHeight}">
+        <rect width="100%" height="100%" fill="white" />
+        ${currentSvg.replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '')}
+      </svg>
+    `;
+
+      // 创建新的 Image 对象
       const img = new Image();
-      const blob = new Blob([currentSvg], { type: 'image/svg+xml' });
-      const url = URL.createObjectURL(blob);
+
+      // 将 SVG 转换为 Base64 Data URL
+      const base64 = btoa(unescape(encodeURIComponent(svgWithBackground)));
+      const url = `data:image/svg+xml;base64,${base64}`;
 
       // 等待图片加载完成
       await new Promise<void>((resolve, reject) => {
-        img.onload = () => {
-          URL.revokeObjectURL(url); // 清理URL
-          resolve();
-        };
-        img.onerror = (err) => {
-          URL.revokeObjectURL(url);
-          reject(err);
-        };
+        img.onload = () => resolve();
+        img.onerror = (err) => reject(err);
         img.src = url;
       });
 
-      // 创建Canvas
+      // 创建 Canvas 元素
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      if (!ctx) throw new Error('无法获取Canvas上下文');
+      if (!ctx) throw new Error('无法获取 Canvas 上下文');
 
-      // 设置Canvas尺寸
-      canvas.width = img.naturalWidth || img.width;
-      canvas.height = img.naturalHeight || img.height;
+      // 设置 Canvas 尺寸（4倍分辨率）
+      const scale = 4;
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
 
-      // 填充白色背景
+      // 填充白色背景（再次确保）
       ctx.fillStyle = 'white';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       // 绘制图像
-      ctx.drawImage(img, 0, 0);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-      // 转换为PNG并下载
+      // 转换为 PNG 并下载
       canvas.toBlob((blob) => {
         if (blob) {
           saveAs(blob, 'mermaid-diagram.png');
         }
-      });
+      }, 'image/png');
     } catch (err) {
       console.error('PNG下载失败:', err);
-      alert('PNG下载失败，请重试');
+      alert('PNG下载失败，请尝试下载SVG格式');
     }
   };
 
