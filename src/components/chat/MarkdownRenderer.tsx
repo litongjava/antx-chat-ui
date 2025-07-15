@@ -8,6 +8,7 @@ import 'katex/dist/katex.min.css';
 import CodeBlokTools from "../CodeBlokTools.tsx";
 import './CodeBlock.css';
 import './MarkdownRenderer.css'
+import CodeBlock from "./CodeBlock.tsx";
 
 interface MarkdownRendererImplProps {
   /** The markdown content to render, possibly containing LaTeX expressions */
@@ -42,7 +43,7 @@ const MarkdownRendererImpl: React.FC<MarkdownRendererImplProps> = ({content, cla
         remarkPlugins={[remarkMath, remarkGfm]}
         rehypePlugins={[rehypeKatex]}
         components={{
-          a: ({ href, children, ...props }) => (
+          a: ({href, children, ...props}) => (
             <a
               href={href}
               target="_blank"
@@ -57,31 +58,12 @@ const MarkdownRendererImpl: React.FC<MarkdownRendererImplProps> = ({content, cla
             if (inline || !match) {
               return <code className={langClass} {...props}>{children}</code>;
             }
-            const id = Math.random().toString(36).substr(2, 9);
-            // 剔除 ref，避免类型不匹配
-            const {ref, ...restProps} = props as { ref?: unknown; [key: string]: any };
-
             return (
-              <div className="code-block">
-                <div className="code-header">
-                  <div className="lang-info">
-                    <span>{match[1]}</span>
-                  </div>
-                  <CodeBlokTools id={id} language={match[1]} onRun={(code, lang) => {
-                    // 这里把 code 和 lang 交给上层去处理
-                    onRunCode?.(code, lang);
-                  }}/>
-                </div>
-                <SyntaxHighlighter
-                  id={id}
-                  language={match[1]}
-                  PreTag="div"
-                  customStyle={{margin: 0, padding: '1em'}}
-                  {...restProps}
-                >
-                  {String(children).replace(/\n$/, '')}
-                </SyntaxHighlighter>
-              </div>
+              <CodeBlock
+                code={String(children)}
+                language={match[1]}
+                onRunCode={onRunCode}
+              />
             );
           },
           table: ({children}: { children?: React.ReactNode }) => (

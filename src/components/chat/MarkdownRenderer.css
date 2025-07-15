@@ -1,98 +1,100 @@
 .markdown-content {
-    font-size: 16px;
-    line-height: 1.6;
+  font-size: 16px;
+  line-height: 1.6;
 }
 
 /* 简单地回到外部序号 */
 .markdown-content ol {
-    list-style-position: outside;
-    padding-inline-start: 1.2em;
+  list-style-position: outside;
+  padding-inline-start: 1.2em;
 }
 
 /* 进阶：用 CSS 计数器完全自定义序号 */
 .markdown-content ol {
-    counter-reset: item;
-    list-style: none;
-    padding-left: 0;
+  counter-reset: item;
+  list-style: none;
+  padding-left: 0;
 }
+
 .markdown-content ol > li {
-    counter-increment: item;
-    position: relative;
-    padding-left: 2em;
+  counter-increment: item;
+  position: relative;
+  padding-left: 2em;
 }
+
 .markdown-content ol > li::before {
-    content: counter(item) ". ";
-    position: absolute;
-    left: 0;
+  content: counter(item) ". ";
+  position: absolute;
+  left: 0;
 }
 
 
 .markdown-content ul {
-    list-style-position: outside;
-    padding-inline-start: 1.2rem;
+  list-style-position: outside;
+  padding-inline-start: 1.2rem;
 }
 
 
 /* 表格容器 */
 .table-container {
-    overflow-x: auto;
-    margin: 16px 0;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
+  margin: 16px 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* 表格样式 */
 .markdown-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 14px;
-    line-height: 1.6;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  line-height: 1.6;
 }
 
 /* 表头样式 */
 .table-header {
-    background-color: #f8f9fa;
-    border: 1px solid #dee2e6;
-    padding: 12px 16px;
-    text-align: left;
-    font-weight: 600;
-    color: #495057;
-    white-space: nowrap;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #495057;
+  white-space: nowrap;
 }
 
 /* 表格单元格 */
 .table-cell {
-    border: 1px solid #dee2e6;
-    padding: 12px 16px;
-    vertical-align: top;
-    color: #212529;
+  border: 1px solid #dee2e6;
+  padding: 12px 16px;
+  vertical-align: top;
+  color: #212529;
 }
 
 /* 数学公式样式优化 */
 .katex-display {
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding: 8px 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 8px 0;
 }
 
 .katex {
-    font-size: 1.1em;
+  font-size: 1.1em;
 }
 
 /* 响应式表格 */
 @media (max-width: 768px) {
-    .table-container {
-        margin: 12px -16px;
-        border-radius: 0;
-    }
+  .table-container {
+    margin: 12px -16px;
+    border-radius: 0;
+  }
 
-    .table-header,
-    .table-cell {
-        padding: 8px 12px;
-        font-size: 13px;
-    }
+  .table-header,
+  .table-cell {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
 
-    .markdown-table {
-        font-size: 13px;
-    }
+  .markdown-table {
+    font-size: 13px;
+  }
 }

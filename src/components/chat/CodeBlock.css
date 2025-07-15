@@ -48,3 +48,11 @@
 .copy-button.copied {
     color: #4caf50;
 }
+.mermaid-container {
+    overflow-x: auto;
+    text-align: center;
+}
+.mermaid-container svg {
+    max-width: 100%;
+    height: auto;
+}
