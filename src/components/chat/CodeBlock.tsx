@@ -7,12 +7,14 @@ import './CodeBlock.css';
 interface CodeBlockProps {
   code: string;
   language: string;
+  loading: boolean;
   onRunCode?: (code: string, language: string) => void;
 }
 
-const CodeBlock: React.FC<CodeBlockProps> = ({ code, language, onRunCode }) => {
-  if (language === 'mermaid') {
-    return <MermaidRenderer chart={code.trim()} />;
+const CodeBlock: React.FC<CodeBlockProps> = ({code, language, loading, onRunCode}) => {
+  console.log("loading:{}",loading)
+  if (language === 'mermaid' && !loading) {
+    return <MermaidRenderer chart={code.trim()}/>;
   }
 
   const id = Math.random().toString(36).slice(2, 9);
@@ -20,7 +22,7 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ code, language, onRunCode }) => {
     <div className="code-block">
       <div className="code-header">
         <div className="lang-info"><span>{language}</span></div>
-        <CodeBlokTools id={id} language={language} onRun={(c, l) => onRunCode?.(c, l)} />
+        <CodeBlokTools id={id} language={language} onRun={(c, l) => onRunCode?.(c, l)}/>
       </div>
       <SyntaxHighlighter id={id} language={language} PreTag="div" customStyle={{margin: 0, padding: '1em'}}>
         {code.replace(/\n$/, '')}

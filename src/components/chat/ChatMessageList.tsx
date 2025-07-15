@@ -20,6 +20,7 @@ interface ChatListProps {
   setPreviewHtml: React.Dispatch<React.SetStateAction<string | null>>;
   previewVisible: boolean;
   setPreviewVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  loading: boolean;
 
 }
 
@@ -27,7 +28,8 @@ const ChatMessageList: React.FC<ChatListProps> = ({
                                                     messages,
                                                     onSubmit,
                                                     setPreviewHtml,
-                                                    setPreviewVisible
+                                                    setPreviewVisible,
+                                                    loading
                                                   }) => {
   const renderMarkdown = (raw: string, reasoning?: string | null) => (
     <div className="markdown-content">
@@ -39,7 +41,7 @@ const ChatMessageList: React.FC<ChatListProps> = ({
             key: '1',
             label: 'Thought',
             children: (
-              <MarkdownRenderer content={reasoning} onRunCode={(code, lang) => {
+              <MarkdownRenderer content={reasoning} loading={loading} onRunCode={(code, lang) => {
                 if (lang === 'html') {
                   setPreviewHtml(code);
                   setPreviewVisible(true);
@@ -51,7 +53,7 @@ const ChatMessageList: React.FC<ChatListProps> = ({
           }]}
         />
       )}
-      <MarkdownRenderer content={raw} onRunCode={(code, lang) => {
+      <MarkdownRenderer content={raw} loading={loading} onRunCode={(code, lang) => {
         if (lang === 'html') {
           setPreviewHtml(code);
           setPreviewVisible(true);

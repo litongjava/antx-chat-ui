@@ -3,9 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
-import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter';
 import 'katex/dist/katex.min.css';
-import CodeBlokTools from "../CodeBlokTools.tsx";
 import './CodeBlock.css';
 import './MarkdownRenderer.css'
 import CodeBlock from "./CodeBlock.tsx";
@@ -15,10 +13,11 @@ interface MarkdownRendererImplProps {
   content: string;
   /** Optional additional className for the wrapper div */
   className?: string;
+  loading: boolean;
   onRunCode?: (code: string, language: string) => void;
 }
 
-const MarkdownRendererImpl: React.FC<MarkdownRendererImplProps> = ({content, className, onRunCode}) => {
+const MarkdownRendererImpl: React.FC<MarkdownRendererImplProps> = ({content, className, loading, onRunCode}) => {
   const processedContent = useMemo(() => {
     if (!content) return content;
 
@@ -62,6 +61,7 @@ const MarkdownRendererImpl: React.FC<MarkdownRendererImplProps> = ({content, cla
               <CodeBlock
                 code={String(children)}
                 language={match[1]}
+                loading={loading}
                 onRunCode={onRunCode}
               />
             );
@@ -88,6 +88,8 @@ const MarkdownRendererImpl: React.FC<MarkdownRendererImplProps> = ({content, cla
 export default React.memo(
   MarkdownRendererImpl,
   (prev, next) => {
-    return prev.content === next.content
+    const result = prev.content === next.content
+      && prev.loading === next.loading;
+    return result;
   }
 );

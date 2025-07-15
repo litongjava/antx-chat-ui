@@ -251,6 +251,7 @@ const Chat: React.FC = () => {
           setPreviewHtml={setPreviewHtml}
           previewVisible={previewVisible}
           setPreviewVisible={setPreviewVisible}
+          loading={loading}
         />
 
         <ChatSender
