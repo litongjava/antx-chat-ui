@@ -1,13 +1,12 @@
 // ChatMessageList.tsx
 import React, {useCallback, useMemo, useState} from 'react';
 import {Prompts, Welcome} from '@ant-design/x';
-import {Button, Collapse, Flex, Space} from 'antd';
+import {Button, Collapse, Flex, Space, Spin} from 'antd';
 import {Bubble} from '@ant-design/x/es';
 import {BubbleDataType} from './types.ts';
 import {DESIGN_GUIDE, HOT_TOPICS} from './consts.tsx';
 import ReloadOutlined from '@ant-design/icons/lib/icons/ReloadOutlined';
 import {CopyOutlined, DislikeOutlined, EllipsisOutlined, LikeOutlined, ShareAltOutlined} from "@ant-design/icons";
-import 'katex/dist/katex.min.css';
 import MarkdownRenderer from "./MarkdownRenderer.tsx";
 
 
@@ -120,7 +119,11 @@ const ChatMessageList: React.FC<ChatListProps> = ({
           ...common,
           className: 'assistant-message',
           messageRender: (content: string) => {
-            return renderAssistantMessage(content, i.reasoning_content ?? null);
+            if (!content && !i.reasoning_content) {
+              return <Spin/>;
+            } else {
+              return renderAssistantMessage(content, i.reasoning_content ?? null);
+            }
           },
           typing: false,
         };
@@ -140,7 +143,7 @@ const ChatMessageList: React.FC<ChatListProps> = ({
             assistant: {
               placement: 'start',
               variant: 'borderless',
-              footer: (item: any) => (
+              footer: (item: string) => (
                 <div style={{display: 'flex'}}>
                   <Button type="text" size="small" icon={<ReloadOutlined/>}/>
                   <Button
@@ -160,7 +163,7 @@ const ChatMessageList: React.FC<ChatListProps> = ({
             user: {
               placement: 'end',
               variant: 'filled',
-              footer: (item: any) => (
+              footer: (item: string) => (
                 <div
                   style={{
                     display: 'flex',
