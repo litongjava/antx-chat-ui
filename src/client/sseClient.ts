@@ -8,7 +8,7 @@ export interface ChatMessage {
   session_id: string;
   role: string;
   content: string;
-  requestParam?: SSERequestParam,
+  requestParam?: ChatAskRequestParam,
 }
 
 // 定义 SSE 事件数据结构
@@ -18,7 +18,7 @@ export interface SSEEvent {
 }
 
 // 定义请求参数类型
-export interface SSERequestParam {
+export interface ChatAskRequestParam {
   session_id: string;
   school_id?: string;
   type?: string;
@@ -27,11 +27,12 @@ export interface SSERequestParam {
   provider?: string;
   model?: string;
   tools?: string[];
+  history_enabled:boolean
 
 }
 
 export async function sendSSERequest(
-  params: SSERequestParam,
+  params: ChatAskRequestParam,
   //
   onEvent?: (event: SSEEvent) => void, signal?: AbortSignal,
   //
@@ -45,6 +46,7 @@ export async function sendSSERequest(
     provider,
     model,
     tools,
+    history_enabled
   } = params;
 
 
@@ -61,6 +63,7 @@ export async function sendSSERequest(
     chat_type,
     messages,
     tools,
+    history_enabled,
     stream: true,
   };
 

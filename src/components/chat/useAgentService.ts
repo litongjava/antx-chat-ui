@@ -3,7 +3,7 @@ import {useRef, useState} from 'react';
 import {v4 as uuidv4} from 'uuid';
 import {useUser} from '../../context/UserContext';
 import {BubbleDataType} from './types';
-import {ChatMessage, sendSSERequest, SSEEvent, SSERequestParam,} from '../../client/sseClient';
+import {ChatMessage, sendSSERequest, SSEEvent, ChatAskRequestParam,} from '../../client/sseClient';
 
 export default function useAgentService(curSessionId: string) {
   // 为每个 session 管理独立的 AbortController
@@ -59,7 +59,7 @@ export default function useAgentService(curSessionId: string) {
    * 发送消息，支持并存多条 SSE 流
    */
   const sendMessage = async (
-    param: SSERequestParam,
+    param: ChatAskRequestParam,
     message: ChatMessage
   ): Promise<boolean> => {
     const sid = param.session_id;

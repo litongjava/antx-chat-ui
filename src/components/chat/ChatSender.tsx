@@ -1,7 +1,7 @@
 // ChatSender.tsx
 import React, {useEffect} from 'react';
 import {Attachments, Prompts, Sender} from '@ant-design/x';
-import {Button, Flex, Select, Tag, Tooltip} from 'antd';
+import {Button, Checkbox, Flex, Select, Tag, Tooltip} from 'antd';
 import {CloudUploadOutlined, PaperClipOutlined,} from '@ant-design/icons';
 import {
   VOLC_ENGINE_MODEL_OPTIONS,
@@ -31,6 +31,8 @@ interface ChatSenderProps {
   setAttachmentsOpen: (open: boolean) => void;
   attachedFiles: AttachmentFile[];
   setAttachedFiles: (files: AttachmentFile[]) => void;
+  historyEnabled: boolean; // new
+  setHistoryEnabled: (enabled: boolean) => void; // new
 }
 
 const ChatSender: React.FC<ChatSenderProps> = ({
@@ -51,6 +53,8 @@ const ChatSender: React.FC<ChatSenderProps> = ({
                                                  setAttachmentsOpen,
                                                  attachedFiles,
                                                  setAttachedFiles,
+                                                 historyEnabled,
+                                                 setHistoryEnabled
                                                }) => {
   // 组件内
   type Option = { label: string; value: string };
@@ -69,7 +73,7 @@ const ChatSender: React.FC<ChatSenderProps> = ({
     if (!modelOptions.some(o => o.value === model)) {
       setModel(modelOptions[0].value);
     }
-  }, [provider]); // 只要 provider 变，检查并重置 model
+  }, [provider]);
 
 
   const senderHeader = (
@@ -147,6 +151,17 @@ const ChatSender: React.FC<ChatSenderProps> = ({
             mode="multiple"
             styles={{root: {minWidth: 180}}}
           />
+        </Tooltip>
+
+        {/* New history checkbox */}
+        <Tooltip title="Include history with submit" placement="top">
+          <Checkbox
+            checked={historyEnabled}
+            onChange={(e) => setHistoryEnabled(e.target.checked)}
+            style={{ marginLeft: 8 }}
+          >
+            history
+          </Checkbox>
         </Tooltip>
 
         {tools.length > 0 && (

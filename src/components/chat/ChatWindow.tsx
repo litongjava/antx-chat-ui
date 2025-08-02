@@ -6,7 +6,7 @@ import {AttachmentFile} from './types.ts';
 import ChatMessageList from './ChatMessageList.tsx';
 import ChatSender from './ChatSender.tsx';
 import useAgentService from "./useAgentService.ts";
-import {SSERequestParam} from "../../client/sseClient.ts";
+import {ChatAskRequestParam} from "../../client/sseClient.ts";
 import {TYPE_OPTIONS} from "./consts.tsx";
 import {ChatService} from "./ChatService.ts";
 import {showError} from "../../utils/ErrorUtils.ts";
@@ -46,6 +46,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   const [model, setModel] = useState<string>('deepseek-v3');
   const [type, setType] = useState<string>(TYPE_OPTIONS[0].value);
   const [tools, setTools] = useState<string[]>([]);
+  const [historyEnabled, setHistoryEnabled] = useState(true);
 
   const {user} = useUser();
   const token = user?.token;
@@ -58,12 +59,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       message.error('Request is in progress, please wait for the request to complete.');
       return;
     }
-    const requestParam: SSERequestParam = {
+    const requestParam: ChatAskRequestParam = {
       session_id: curConversation,
       provider: provider,
       type: type,
       model: model,
       tools: tools,
+      history_enabled: historyEnabled
     }
     const success = sendMessage(requestParam, {session_id: curConversation, role: "user", content: val});
     if (!success) {
@@ -125,6 +127,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         setAttachmentsOpen={setAttachmentsOpen}
         attachedFiles={attachedFiles}
         setAttachedFiles={setAttachedFiles}
+        historyEnabled={historyEnabled}
+        setHistoryEnabled={setHistoryEnabled}
       />
     </div>
   );
