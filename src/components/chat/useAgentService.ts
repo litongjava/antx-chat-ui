@@ -33,6 +33,17 @@ export default function useAgentService(curSessionId: string) {
     }));
   };
 
+  const appendSessionMsgs = (sessionId: string, msgs: BubbleDataType[]) => {
+    setSessionMsgMap(prev => {
+      const prevMsgs = prev[sessionId] || [];
+      return {
+        ...prev,
+        [sessionId]: [...prevMsgs, ...msgs],
+      };
+    });
+  };
+
+
   /**
    * 设置某个 session 的 loading
    */
@@ -81,7 +92,7 @@ export default function useAgentService(curSessionId: string) {
       question_id: '',
       answer_id: '',
     };
-    updateSessionMsgs(sid, [userMessage, assistantMessage]);
+    appendSessionMsgs(sid, [userMessage, assistantMessage]);
 
     // 累积内容
     let acc = {...assistantMessage};
