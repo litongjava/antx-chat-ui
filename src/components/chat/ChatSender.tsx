@@ -1,9 +1,16 @@
 // ChatSender.tsx
-import React from 'react';
+import React, {useEffect} from 'react';
 import {Attachments, Prompts, Sender} from '@ant-design/x';
 import {Button, Flex, Select, Tag, Tooltip} from 'antd';
 import {CloudUploadOutlined, PaperClipOutlined,} from '@ant-design/icons';
-import {MODEL_OPTIONS, PROVIDER_OPTIONS, SENDER_PROMPTS, TOOL_OPTIONS, TYPE_OPTIONS} from './consts.tsx';
+import {
+  VOLC_ENGINE_MODEL_OPTIONS,
+  PROVIDER_OPTIONS,
+  SENDER_PROMPTS,
+  TOOL_OPTIONS,
+  TYPE_OPTIONS,
+  GOOGLE_ENGINE_MODEL_OPTIONS
+} from './consts.tsx';
 import {AttachmentFile} from './types.ts';
 
 interface ChatSenderProps {
@@ -45,6 +52,26 @@ const ChatSender: React.FC<ChatSenderProps> = ({
                                                  attachedFiles,
                                                  setAttachedFiles,
                                                }) => {
+  // 组件内
+  type Option = { label: string; value: string };
+  let modelOptions: Option[] = [];
+
+  if (provider === 'google') {
+    modelOptions = GOOGLE_ENGINE_MODEL_OPTIONS;
+  } else if (provider === 'volcengine') {
+    modelOptions = VOLC_ENGINE_MODEL_OPTIONS;
+  } else {
+    modelOptions = [];
+  }
+
+  useEffect(() => {
+    if (modelOptions.length === 0) return;
+    if (!modelOptions.some(o => o.value === model)) {
+      setModel(modelOptions[0].value);
+    }
+  }, [provider]); // 只要 provider 变，检查并重置 model
+
+
   const senderHeader = (
     <Sender.Header
       title="Upload File"
@@ -96,8 +123,9 @@ const ChatSender: React.FC<ChatSenderProps> = ({
           <Select
             value={model}
             onChange={setModel}
-            options={MODEL_OPTIONS}
+            options={modelOptions}
             styles={{popup: {root: {minWidth: 180}}}}
+            disabled={!provider}
           />
         </Tooltip>
 

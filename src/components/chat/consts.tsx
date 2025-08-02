@@ -102,9 +102,15 @@ export const SENDER_PROMPTS: GetProp<typeof Prompts, 'items'> = [ // 添加类�
 
 export const PROVIDER_OPTIONS = [
   {label: 'Volc Engine', value: 'volcengine'},
+  {label: 'Google', value: 'google'},
 ];
 
-export const MODEL_OPTIONS = [
+export const GOOGLE_ENGINE_MODEL_OPTIONS = [
+  {label: 'gemini-2.5-pro', value: 'gemini-2.5-pro'},
+  {label: 'gemini-2.5-flash', value: 'gemini-2.5-flash'},
+];
+
+export const VOLC_ENGINE_MODEL_OPTIONS = [
   {label: 'DeepSeek v3', value: 'deepseek-v3'},
   {label: 'DeepSeek (R1)', value: 'deepseek-r1'},
 ];

@@ -1,7 +1,7 @@
 // Chat.tsx
 import {CloseOutlined, MenuUnfoldOutlined, PlusOutlined,} from '@ant-design/icons';
 import {Button, message} from 'antd';
-import React, {useEffect, useRef, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import './Chat.css';
 import {ConversationItem} from './types.ts';
 import ChatSlider from './ChatSlider.tsx';
