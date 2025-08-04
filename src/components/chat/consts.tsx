@@ -118,6 +118,8 @@ export const VOLC_ENGINE_MODEL_OPTIONS = [
 export const TYPE_OPTIONS = [
   {label: 'General', value: 'genearl'},
   {label: 'Translator', value: 'translator'},
+  {label: 'vocabulary', value: 'english_vocabulary'},
+  {label: 'sentence', value: 'english_sentence'},
 ]
 
 
