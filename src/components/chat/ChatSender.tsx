@@ -4,15 +4,16 @@ import {Attachments, Prompts, Sender} from '@ant-design/x';
 import {Button, Checkbox, Flex, Select, Tag, Tooltip} from 'antd';
 import {CloudUploadOutlined, PaperClipOutlined,} from '@ant-design/icons';
 import {
-  VOLC_ENGINE_MODEL_OPTIONS,
+  GOOGLE_ENGINE_MODEL_OPTIONS,
   PROVIDER_OPTIONS,
-  SENDER_PROMPTS,
   TOOL_OPTIONS,
   TYPE_OPTIONS,
-  GOOGLE_ENGINE_MODEL_OPTIONS
+  VOLC_ENGINE_MODEL_OPTIONS
 } from './consts.tsx';
 import {AttachmentFile} from './types.ts';
+import {FileService} from "./FileService.tsx";
 
+// ChatSender.tsx
 interface ChatSenderProps {
   inputValue: string;
   setInputValue: (value: string) => void;
@@ -56,6 +57,15 @@ const ChatSender: React.FC<ChatSenderProps> = ({
                                                  historyEnabled,
                                                  setHistoryEnabled
                                                }) => {
+  // 在组件内添加 onPasteFile 处理
+  const handlePasteFile = async (_firstFile: File, files: FileList) => {
+    for (const file of files) {
+      const token = localStorage.getItem('token') || '';
+      const fileId = await FileService.uploadFile(file, token);
+      console.log("fileId: " + fileId);
+    }
+  };
+
   // 组件内
   type Option = { label: string; value: string };
   let modelOptions: Option[] = [];
@@ -104,7 +114,7 @@ const ChatSender: React.FC<ChatSenderProps> = ({
     <>
       {/* 🌟 提示词 */}
       <Prompts
-        items={SENDER_PROMPTS}
+        //items={SENDER_PROMPTS}
         onItemClick={(info) => {
           onSubmit(info.data.description as string);
         }}
@@ -177,6 +187,7 @@ const ChatSender: React.FC<ChatSenderProps> = ({
           <Sender
             value={inputValue}
             header={senderHeader}
+            onPasteFile={handlePasteFile}
             onSubmit={() => {
               onSubmit(inputValue);
               setInputValue('');
