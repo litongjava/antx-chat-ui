@@ -195,11 +195,46 @@
 }
 
 .sender {
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  min-height: 10%;
-  max-height: 50%;
   max-width: 900px;
   margin: 0 auto;
+  /* 限高避免整块往下推出视口 */
+  max-height: 100%;
+  min-height: 10%; /* 重要：子 flex 自动滚动生效 */
+}
+
+.sender .input-area {
+  flex: 1 1 auto;
+  min-height: 0; /* 使 overflow 生效 */
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 固定 action bar（发送/语音按钮）始终可见 */
+.sender .send-actions {
+  flex-shrink: 0;
+  position: sticky;
+  bottom: 0;
+  background: var(--colorBgContainer);
+  padding: 6px 0;
+  border-top: 1px solid var(--colorBorderSecondary);
+  z-index: 5;
+}
+
+/* 限制内部 textarea 自适应高度，防止撑爆 */
+.sender textarea,
+.sender textarea:focus {
+  max-height: 220px;
+  overflow: auto;
+  resize: none;
+}
+/* 如果 @ant-design/x Sender 内部用了 contenteditable 等，确保它自身不会无限展开 */
+.sender .x-sender-content { /* 这个类名根据实际渲染调整，如果不准确用 devtools 查 */
+  overflow: auto;
+  min-height: 0;
 }
 
 @media (max-width: 768px) {

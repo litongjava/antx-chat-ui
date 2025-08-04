@@ -158,7 +158,7 @@ const ChatSender: React.FC<ChatSenderProps> = ({
           <Checkbox
             checked={historyEnabled}
             onChange={(e) => setHistoryEnabled(e.target.checked)}
-            style={{ marginLeft: 8 }}
+            style={{marginLeft: 8}}
           >
             history
           </Checkbox>
@@ -171,36 +171,48 @@ const ChatSender: React.FC<ChatSenderProps> = ({
         )}
       </div>
       {/* 🌟 输入框 */}
-      <Sender
-        value={inputValue}
-        header={senderHeader}
-        onSubmit={() => {
-          onSubmit(inputValue);
-          setInputValue('');
-        }}
-        onChange={setInputValue}
-        onCancel={onCancel}
-        prefix={
-          <Button
-            type="text"
-            icon={<PaperClipOutlined style={{fontSize: 18}}/>}
-            onClick={() => setAttachmentsOpen(!attachmentsOpen)}
+      <div className="sender">
+        {/* 输入 + 附件 区做成可滚动 */}
+        <div className="input-area">
+          <Sender
+            value={inputValue}
+            header={senderHeader}
+            onSubmit={() => {
+              onSubmit(inputValue);
+              setInputValue('');
+            }}
+            onChange={setInputValue}
+            onCancel={onCancel}
+            prefix={
+              <Button
+                type="text"
+                icon={<PaperClipOutlined style={{fontSize: 18}}/>}
+                onClick={() => setAttachmentsOpen(!attachmentsOpen)}
+              />
+            }
+            loading={loading}
+            className="sender-inner" // 可选，用于更精细 style 定位
+            allowSpeech
+            placeholder="Ask or input / use skills"
+            // 不再直接让默认 actions 占据底部，把按钮渲染到下面的 send-actions
+            actions={(_, info) => {
+              const {SendButton, LoadingButton, SpeechButton} = info.components;
+              return (
+                <div className="send-actions">
+                  <Flex gap={4} style={{justifyContent: 'flex-end'}}>
+                    <SpeechButton className="speechButton"/>
+                    {loading ? (
+                      <LoadingButton type="default"/>
+                    ) : (
+                      <SendButton type="primary"/>
+                    )}
+                  </Flex>
+                </div>
+              );
+            }}
           />
-        }
-        loading={loading}
-        className="sender"
-        allowSpeech
-        actions={(_, info) => {
-          const {SendButton, LoadingButton, SpeechButton} = info.components;
-          return (
-            <Flex gap={4}>
-              <SpeechButton className="speechButton"/>
-              {loading ? <LoadingButton type="default"/> : <SendButton type="primary"/>}
-            </Flex>
-          );
-        }}
-        placeholder="Ask or input / use skills"
-      />
+        </div>
+      </div>
     </>
   );
 };

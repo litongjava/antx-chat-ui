@@ -27,8 +27,8 @@ export interface ChatAskRequestParam {
   provider?: string;
   model?: string;
   tools?: string[];
+  file_ids?: string[];
   history_enabled:boolean
-
 }
 
 export async function sendSSERequest(
