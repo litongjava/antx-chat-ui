@@ -145,6 +145,12 @@
   flex: 1;
   overflow: hidden;
 }
+.sider-loading, .chat-window-loading {
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  margin: 16px;
+}
 
 @media (max-width: 768px) {
   .chat {

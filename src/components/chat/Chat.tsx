@@ -1,7 +1,7 @@
 // Chat.tsx
 import {CloseOutlined, MenuUnfoldOutlined, PlusOutlined,} from '@ant-design/icons';
-import {Button, message} from 'antd';
-import {useEffect, useRef, useState} from 'react';
+import {Button, message, Skeleton} from 'antd';
+import { FC, useEffect, useRef, useState } from 'react';
 import './Chat.css';
 import {ConversationItem} from './types.ts';
 import ChatSlider from './ChatSlider.tsx';
@@ -10,7 +10,7 @@ import {ChatService} from "./ChatService.ts";
 import {showError} from "../../utils/ErrorUtils.ts";
 import ChatWindow from "./ChatWindow.tsx";
 
-const Chat: React.FC = () => {
+const Chat: FC = () => {
 
   // 修复1: 初始化conversations为空数组
   const [conversations, setConversations] = useState<ConversationItem[]>([]);
@@ -23,6 +23,7 @@ const Chat: React.FC = () => {
   const [mobileSiderVisible, setMobileSiderVisible] = useState(false);
   const [previewHtml, setPreviewHtml] = useState<string | null>(null);
   const [previewVisible, setPreviewVisible] = useState(false);
+  const [loadingConversations, setLoadingConversations] = useState(true);
 
   const {user} = useUser();
   const token = user?.token;
@@ -45,7 +46,9 @@ const Chat: React.FC = () => {
       }
 
       try {
+        setLoadingConversations(true)
         const sessions = await ChatService.listSessions(token);
+        setLoadingConversations(false)
         setConversations(sessions);
         if (sessions.length === 0) {
           await handleNewConversation();
@@ -54,6 +57,7 @@ const Chat: React.FC = () => {
           setCurConversation(sessions[0].key);
         }
       } catch (error) {
+        setLoadingConversations(false)
         showError(error, '加载会话失败');
       }
     };
@@ -139,24 +143,41 @@ const Chat: React.FC = () => {
         <div className="overlay" onClick={() => setMobileSiderVisible(false)}/>
       )}
 
-      <ChatSlider
-        siderCollapsed={siderCollapsed}
-        toggleSider={toggleSider}
-        mobileSiderVisible={mobileSiderVisible}
-        setMobileSiderVisible={setMobileSiderVisible}
-        conversations={conversations}
-        curConversation={curConversation || ''}
-        setCurConversation={setCurConversation}
-        setConversations={setConversations}
-        handleNewConversation={handleNewConversation}
-        onRename={handleRenameSession}
-        onDelete={handleDeleteSession}
-        newSessionRef={newSessionRef}
-      />
+      {loadingConversations ? (
+        <div className="sider-loading">
+          <Skeleton active paragraph={{ rows: 6 }} />
+        </div>
+      ) : (
+        <ChatSlider
+          siderCollapsed={siderCollapsed}
+          toggleSider={toggleSider}
+          mobileSiderVisible={mobileSiderVisible}
+          setMobileSiderVisible={setMobileSiderVisible}
+          conversations={conversations}
+          curConversation={curConversation || ''}
+          setCurConversation={setCurConversation}
+          setConversations={setConversations}
+          handleNewConversation={handleNewConversation}
+          onRename={handleRenameSession}
+          onDelete={handleDeleteSession}
+          newSessionRef={newSessionRef}
+        />
+      )}
 
-      <ChatWindow curConversation={curConversation} newSessionRef={newSessionRef}
-                  previewHtml={previewHtml} setPreviewHtml={setPreviewHtml}
-                  previewVisible={previewVisible} setPreviewVisible={setPreviewVisible}/>
+      {loadingConversations ? (
+        <div className="chat-window-loading">
+          <Skeleton active paragraph={{ rows: 10 }} />
+        </div>
+      ) : (
+        <ChatWindow
+          curConversation={curConversation}
+          newSessionRef={newSessionRef}
+          previewHtml={previewHtml}
+          setPreviewHtml={setPreviewHtml}
+          previewVisible={previewVisible}
+          setPreviewVisible={setPreviewVisible}
+        />
+      )}
 
       {previewVisible && (
         <div className="right-panel">
