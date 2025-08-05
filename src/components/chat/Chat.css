@@ -145,11 +145,28 @@
   flex: 1;
   overflow: hidden;
 }
-.sider-loading, .chat-window-loading {
-  padding: 20px;
-  background: white;
-  border-radius: 8px;
-  margin: 16px;
+
+/* 加载动画样式 */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.loading-spinner {
+  text-align: center;
+}
+
+.loading-spinner .ant-spin-text {
+  margin-top: 16px;
+  font-size: 16px;
 }
 
 @media (max-width: 768px) {

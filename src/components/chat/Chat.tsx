@@ -1,7 +1,7 @@
 // Chat.tsx
 import {CloseOutlined, MenuUnfoldOutlined, PlusOutlined,} from '@ant-design/icons';
-import {Button, message, Skeleton} from 'antd';
-import { FC, useEffect, useRef, useState } from 'react';
+import {Button, message, Spin} from 'antd';
+import {FC, useEffect, useRef, useState} from 'react';
 import './Chat.css';
 import {ConversationItem} from './types.ts';
 import ChatSlider from './ChatSlider.tsx';
@@ -23,7 +23,7 @@ const Chat: FC = () => {
   const [mobileSiderVisible, setMobileSiderVisible] = useState(false);
   const [previewHtml, setPreviewHtml] = useState<string | null>(null);
   const [previewVisible, setPreviewVisible] = useState(false);
-  const [loadingConversations, setLoadingConversations] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   const {user} = useUser();
   const token = user?.token;
@@ -46,18 +46,18 @@ const Chat: FC = () => {
       }
 
       try {
-        setLoadingConversations(true)
+        setLoading(true)
         const sessions = await ChatService.listSessions(token);
-        setLoadingConversations(false)
+        setLoading(false)
         setConversations(sessions);
         if (sessions.length === 0) {
           await handleNewConversation();
         } else {
-          newSessionRef.current=false;
+          newSessionRef.current = false;
           setCurConversation(sessions[0].key);
         }
       } catch (error) {
-        setLoadingConversations(false)
+        setLoading(false)
         showError(error, '加载会话失败');
       }
     };
@@ -79,7 +79,7 @@ const Chat: FC = () => {
     if (newSession) {
       setConversations(prev => [newSession, ...prev]);
       setCurConversation(newSession.key);
-      newSessionRef.current=true;
+      newSessionRef.current = true;
       return newSession; // 返回新创建的会话
     }
   };
@@ -116,7 +116,7 @@ const Chat: FC = () => {
 
       if (sessionId === curConversation) {
         const newKey = newList[0]?.key || '';
-        newSessionRef.current=false;
+        newSessionRef.current = false;
         setCurConversation(newKey);
       }
     } else {
@@ -127,6 +127,16 @@ const Chat: FC = () => {
 
   return (
     <div className="layout">
+      {/* 全局加载动画 */}
+      {loading && (
+        <div className="loading-overlay">
+          <Spin
+            size="large"
+            className="loading-spinner"
+          />
+        </div>
+      )}
+
       <div className="mobileHeader">
         <Button
           icon={<MenuUnfoldOutlined/>}
@@ -143,41 +153,32 @@ const Chat: FC = () => {
         <div className="overlay" onClick={() => setMobileSiderVisible(false)}/>
       )}
 
-      {loadingConversations ? (
-        <div className="sider-loading">
-          <Skeleton active paragraph={{ rows: 6 }} />
-        </div>
-      ) : (
-        <ChatSlider
-          siderCollapsed={siderCollapsed}
-          toggleSider={toggleSider}
-          mobileSiderVisible={mobileSiderVisible}
-          setMobileSiderVisible={setMobileSiderVisible}
-          conversations={conversations}
-          curConversation={curConversation || ''}
-          setCurConversation={setCurConversation}
-          setConversations={setConversations}
-          handleNewConversation={handleNewConversation}
-          onRename={handleRenameSession}
-          onDelete={handleDeleteSession}
-          newSessionRef={newSessionRef}
-        />
-      )}
 
-      {loadingConversations ? (
-        <div className="chat-window-loading">
-          <Skeleton active paragraph={{ rows: 10 }} />
-        </div>
-      ) : (
-        <ChatWindow
-          curConversation={curConversation}
-          newSessionRef={newSessionRef}
-          previewHtml={previewHtml}
-          setPreviewHtml={setPreviewHtml}
-          previewVisible={previewVisible}
-          setPreviewVisible={setPreviewVisible}
-        />
-      )}
+      <ChatSlider
+        siderCollapsed={siderCollapsed}
+        toggleSider={toggleSider}
+        mobileSiderVisible={mobileSiderVisible}
+        setMobileSiderVisible={setMobileSiderVisible}
+        conversations={conversations}
+        curConversation={curConversation || ''}
+        setCurConversation={setCurConversation}
+        setConversations={setConversations}
+        handleNewConversation={handleNewConversation}
+        onRename={handleRenameSession}
+        onDelete={handleDeleteSession}
+        newSessionRef={newSessionRef}
+      />
+
+
+      <ChatWindow
+        curConversation={curConversation}
+        newSessionRef={newSessionRef}
+        previewHtml={previewHtml}
+        setPreviewHtml={setPreviewHtml}
+        previewVisible={previewVisible}
+        setPreviewVisible={setPreviewVisible}
+      />
+
 
       {previewVisible && (
         <div className="right-panel">
