@@ -5,7 +5,7 @@ import {Button, Checkbox, Flex, Select, Tag, Tooltip} from 'antd';
 import {CloudUploadOutlined, PaperClipOutlined,} from '@ant-design/icons';
 import {
   GOOGLE_ENGINE_MODEL_OPTIONS,
-  PROVIDER_OPTIONS,
+  PLATFORM_OPTIONS,
   TOOL_OPTIONS,
   TYPE_OPTIONS,
   VOLC_ENGINE_MODEL_OPTIONS
@@ -19,8 +19,8 @@ interface ChatSenderProps {
   setInputValue: (value: string) => void;
   onSubmit: (val: string) => void;
   onCancel?: VoidFunction | undefined
-  provider: string;
-  setProvider: (model: string) => void;
+  platform: string;
+  setPlatform: (model: string) => void;
   model: string;
   setModel: (model: string) => void;
   type: string;
@@ -41,8 +41,8 @@ const ChatSender: React.FC<ChatSenderProps> = ({
                                                  setInputValue,
                                                  onSubmit,
                                                  onCancel,
-                                                 provider,
-                                                 setProvider,
+                                                 platform,
+                                                 setPlatform,
                                                  model,
                                                  setModel,
                                                  type,
@@ -70,9 +70,9 @@ const ChatSender: React.FC<ChatSenderProps> = ({
   type Option = { label: string; value: string };
   let modelOptions: Option[] = [];
 
-  if (provider === 'google') {
+  if (platform === 'google') {
     modelOptions = GOOGLE_ENGINE_MODEL_OPTIONS;
-  } else if (provider === 'volcengine') {
+  } else if (platform === 'volcengine') {
     modelOptions = VOLC_ENGINE_MODEL_OPTIONS;
   } else {
     modelOptions = [];
@@ -83,7 +83,7 @@ const ChatSender: React.FC<ChatSenderProps> = ({
     if (!modelOptions.some(o => o.value === model)) {
       setModel(modelOptions[0].value);
     }
-  }, [provider]);
+  }, [platform]);
 
 
   const senderHeader = (
@@ -124,11 +124,11 @@ const ChatSender: React.FC<ChatSenderProps> = ({
         className="senderPrompt"
       />
       <div className="toolbar">
-        <Tooltip title="Select Provider" placement="top">
+        <Tooltip title="Select Platform" placement="top">
           <Select
-            value={provider}
-            onChange={setProvider}
-            options={PROVIDER_OPTIONS}
+            value={platform}
+            onChange={setPlatform}
+            options={PLATFORM_OPTIONS}
             styles={{popup: {root: {minWidth: 180}}}}
           />
         </Tooltip>
@@ -139,7 +139,7 @@ const ChatSender: React.FC<ChatSenderProps> = ({
             onChange={setModel}
             options={modelOptions}
             styles={{popup: {root: {minWidth: 180}}}}
-            disabled={!provider}
+            disabled={!platform}
           />
         </Tooltip>
 
@@ -202,7 +202,7 @@ const ChatSender: React.FC<ChatSenderProps> = ({
               />
             }
             loading={loading}
-            className="sender-inner" // 可选，用于更精细 style 定位
+            className="sender-inner"
             allowSpeech
             placeholder="Ask or input / use skills"
             // 不再直接让默认 actions 占据底部，把按钮渲染到下面的 send-actions

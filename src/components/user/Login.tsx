@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { LockOutlined, MailOutlined } from '@ant-design/icons';
-import { Button, Form, Input, message } from 'antd';
+import { Button, Form, Input,App } from 'antd';
 import { config } from '../../config/config.ts';
 import { useUser } from '../../context/UserContext.tsx';
 import './Login.css';
@@ -10,6 +10,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { setUser } = useUser();
+  const { message } = App.useApp();
 
   const onFinish = async (values: { email: string; password: string }) => {
     try {

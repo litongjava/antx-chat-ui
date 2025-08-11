@@ -42,7 +42,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 
   const [inputValue, setInputValue] = useState('');
 
-  const [provider, setProvider] = useState<string>('volcengine');
+  const [platform, setPlatform] = useState<string>('volcengine');
   const [model, setModel] = useState<string>('deepseek-v3');
   const [type, setType] = useState<string>(TYPE_OPTIONS[0].value);
   const [tools, setTools] = useState<string[]>([]);
@@ -61,7 +61,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     }
     const requestParam: ChatAskRequestParam = {
       session_id: curConversation,
-      provider: provider,
+      provider: platform,
       type: type,
       model: model,
       tools: tools,
@@ -114,8 +114,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         setInputValue={setInputValue}
         onSubmit={onSubmit}
         onCancel={abortRequest}
-        provider={provider}
-        setProvider={setProvider}
+        platform={platform}
+        setPlatform={setPlatform}
         model={model}
         setModel={setModel}
         type={type}

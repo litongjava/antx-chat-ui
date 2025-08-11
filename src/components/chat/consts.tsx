@@ -100,9 +100,17 @@ export const SENDER_PROMPTS: GetProp<typeof Prompts, 'items'> = [ // 添加类�
   },
 ];
 
-export const PROVIDER_OPTIONS = [
+export const PLATFORM_OPTIONS = [
   {label: 'Volc Engine', value: 'volcengine'},
+  {label: 'Bailian', value: 'bailian'},
+  {label: 'ChatGLM', value: 'chat_glm'},
   {label: 'Google', value: 'google'},
+  {label: 'Claude', value: 'claude'},
+];
+
+export const BAILIAN_ENGINE_MODEL_OPTIONS = [
+  {label: 'qwen3-coder-plus', value: 'qwen3-coder-plus'},
+  {label: 'gemini-2.5-flash', value: 'gemini-2.5-flash'},
 ];
 
 export const GOOGLE_ENGINE_MODEL_OPTIONS = [
